@@ -16,7 +16,7 @@ class Tradingpost(BotPlugin):
     def callback_mention(self, message, mentioned_people):
         #TODO: add greeting
         if self.bot_identifier in mentioned_people:
-            self.send(message.frm, '{}: use a command if you want my help.'.format(message.frm))
+            return '{}: use a command if you want my help.'.format(message.frm)
     
     @botcmd
     def card(self, msg, args):
@@ -28,39 +28,39 @@ class Tradingpost(BotPlugin):
                 image=most_recent_printing['image_url'],
                 in_reply_to=msg)
         else:
-            self.send(msg.frm, 'Card not found.')
+            return 'Card not found.'
     
     @botcmd
-    def joke(self, msg):
+    def joke(self, msg, args):
         '''Warning: the jokes are really, really bad.'''
         with open(join(__location__, 'jokes.json'), 'r') as infile:
             joke = random.choice(json.load(infile))
-        self.send(msg.frm, joke['setup'])
+        yield joke['setup']
         sleep(1) #TODO is there a 'send_user_typing_pause()' equivalent for errbot?
-        self.send(msg.frm, joke['punchline'])
+        yield joke['punchline']
     
     @botcmd
     def oracle(self, msg, args):
-        self.send(msg.frm, write_oracle(args))
+        return write_oracle(args)
     
     @botcmd
     def price(self, msg, args):
-        self.send(msg.frm, write_price(args))
+        return write_price(args)
     
     @botcmd
     def pwp(self, msg, args):
-        self.send(msg.frm, write_pwp(args))
+        return write_pwp(args)
     
     @botcmd
     def roll(self, msg, args):
         '''Rolls a die with N sides; defaults to D6.'''
         sides = 6 if args == '' else args
         if sides.isdigit():
-            self.send(msg.frm, 'Rolled a {}-sided die, and the result is...'.format(sides))
+            yield 'Rolled a {}-sided die, and the result is...'.format(sides)
             sleep(1) #TODO is there a 'send_user_typing_pause()' equivalent for errbot?
-            self.send(msg.frm, '... {}! :game_die:'.format(random.randint(1, int(sides))))
+            yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
         else:
-            self.send(msg.frm, 'Please supply a valid number of sides.')
+            yield 'Please supply a valid number of sides.'
 
 
 def emoji_filter(input):
