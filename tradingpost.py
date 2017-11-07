@@ -4,6 +4,7 @@ import logging
 from os import getcwd
 from os.path import dirname, join, realpath
 import random
+from re import sub as re_sub
 import requests
 from time import sleep
 
@@ -23,7 +24,7 @@ class Tradingpost(BotPlugin):
         card = get_card(args)
         if card:
             most_recent_printing = card['editions'][0]
-            self.send_card(title=card['name'].replace('\'', '\\\''),
+            self.send_card(title=card['name'],
                 body='{} ({})'.format(most_recent_printing['set'], most_recent_printing['set_id']),
                 image=most_recent_printing['image_url'],
                 in_reply_to=msg)
@@ -64,7 +65,6 @@ class Tradingpost(BotPlugin):
 
 
 def emoji_filter(input):
-    #TODO another py3 issue?
     ret = input.replace('{', ':_')
     ret = ret.replace('}', '_:')
     lastpos = None
@@ -181,6 +181,7 @@ def get_seasons(dci_number):
 
 
 def write_oracle(search_term):
+    #TODO: make cardname and p/t strong (* gives issue with emoji_filter)
     card = get_card(search_term)
     
     if card:
@@ -193,18 +194,16 @@ def write_oracle(search_term):
                 typeline += cardtype.capitalize() + ' '
         if 'subtypes' in card:
             typeline += '- '
-        if 'subtypes' in card:
             for subtype in card['subtypes']:
                 typeline += subtype.capitalize() + ' '
-        txt = u'*%s %s*\n%s\n%s' % (card['name'], card['cost'], typeline, card['text'])
+        txt = u'%s %s\n%s\n%s' % (card['name'], card['cost'], typeline, card['text'])
         if 'power' in card and 'toughness' in card:
-            txt += u'\n*`%s/%s`*' % (card['power'], card['toughness'])
+            txt += u'\n`%s/%s`' % (card['power'], card['toughness'])
         if 'loyalty' in card:
-            txt += u'\n*`%s`*' % card['loyalty']
-        txt = emoji_filter(txt)
+            txt += u'\n`%s`' % card['loyalty']
+        return emoji_filter(txt)
     else:
-        txt = 'Card not found.'
-    return txt
+        return 'Card not found.'
 
 
 def write_price(search_term):
