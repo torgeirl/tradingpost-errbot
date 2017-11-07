@@ -4,18 +4,17 @@ import logging
 from os import getcwd
 from os.path import dirname, join, realpath
 import random
-from re import sub as re_sub
 import requests
 from time import sleep
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
-logger = logging.getLogger(__name__) #TODO: still valid for errbot?
+logger = logging.getLogger(__name__) # TODO use self.log.info() / self.log.error() instead
 
 class Tradingpost(BotPlugin):
     '''Event handler: looks for bot mentions and bot commands.'''
     
     def callback_mention(self, message, mentioned_people):
-        #TODO: add greeting
+        # TODO: add greeting
         if self.bot_identifier in mentioned_people:
             return '{}: use a command if you want my help.'.format(message.frm)
     
@@ -37,7 +36,7 @@ class Tradingpost(BotPlugin):
         with open(join(__location__, 'jokes.json'), 'r') as infile:
             joke = random.choice(json.load(infile))
         yield joke['setup']
-        sleep(1) #TODO is there a 'send_user_typing_pause()' equivalent for errbot?
+        sleep(1) # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
         yield joke['punchline']
     
     @botcmd
@@ -58,7 +57,7 @@ class Tradingpost(BotPlugin):
         sides = 6 if args == '' else args
         if sides.isdigit():
             yield 'Rolled a {}-sided die, and the result is...'.format(sides)
-            sleep(1) #TODO is there a 'send_user_typing_pause()' equivalent for errbot?
+            sleep(1) # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
             yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
         else:
             yield 'Please supply a valid number of sides.'
@@ -80,7 +79,6 @@ def emoji_filter(input):
 
 
 def find_index_of_sequence(data, sequence, start_index=0):
-    #TODO: error with !price ("a bytes-like object is required, not 'str'")
     index = start_index
     for token in sequence:
         index = data.find(token, index)
@@ -91,6 +89,7 @@ def find_index_of_sequence(data, sequence, start_index=0):
 
 def get_card(name):
     query_url = 'http://api.deckbrew.com/mtg/cards?name=%s' % name
+    logging.info(u'Connecting to http://api.deckbrew.com')
     r = requests.get(query_url)
     try:
         cards = r.json()
@@ -121,11 +120,12 @@ def get_card_value(card_name, set_code):
         'Connection': 'keep-alive',
         'Cache-Control': 'no-cache'
     }
+    logging.info(u'Connecting to http://www.mtggoldfish.com')
     response = requests.get(url, headers=headers)
-    index = find_index_of_sequence(response.content, ['tcgplayer', 'btn-shop-price', '$'])
-    end_index = response.content.find('\\n', index)
+    index = find_index_of_sequence(response.content.decode('utf-8'), ['tcgplayer', 'btn-shop-price', '$'])
+    end_index = response.content.decode('utf-8').find('\\n', index)
     try:
-        value = float(response.content[index + 2:end_index].replace(',', ''))
+        value = float(response.content.decode('utf-8')[index + 2:end_index].replace(',', ''))
     except ValueError:
         value = 0
     return value
@@ -149,6 +149,7 @@ def get_seasons(dci_number):
         'Referer': 'http://www.wizards.com/Magic/PlaneswalkerPoints/%s' % dci_number
     }
     data = {'Parameters': {'DCINumber': dci_number, 'SelectedType': 'Yearly'}}
+    logging.info(u'Connecting to http://www.wizards.com')
     response = requests.post(url, headers=headers, data=json.dumps(data))
 
     if response.status_code is 200:
@@ -181,7 +182,7 @@ def get_seasons(dci_number):
 
 
 def write_oracle(search_term):
-    #TODO: make cardname and p/t strong (* gives issue with emoji_filter)
+    # TODO: make cardname and p/t strong (* gives issue with emoji_filter)
     card = get_card(search_term)
     
     if card:
@@ -210,15 +211,17 @@ def write_price(search_term):
     card = get_card(search_term)
     
     if card:
+        # TODO: this doesn't always return the newest, and if it does not always the price
+        # TODO: replace backend
         most_recent_printing = card['editions'][0]
         card['value'] = get_card_value(card['name'], most_recent_printing['set_id'])
         txt = 'Unable to find price information for %s' % card['name']
         if card['value'] > 0:
-            txt = 'Current market price for most recent printing of {} ({}) - ${.1f}'.format(
+            txt = 'Current market price for most recent printing of {} ({}) - ${}'.format(
                 card['name'], most_recent_printing['set'], card['value'])
+        return txt
     else:
-        txt = 'Card not found.'
-    return txt
+        return 'Card not found.'
 
 
 def write_pwp(dci_number):
@@ -234,8 +237,8 @@ def write_pwp(dci_number):
                 txt += 'eligible for 1 GP bye.'
             else:
                 txt += 'not eligible for GP byes.'
+            return txt
         else:
-            txt = response
+            return response
     else:
-        txt = '\'%s\' doesn\'t look like a DCI number. Try again, but with an actual number.' % dci_number
-    return txt
+        return '\'%s\' doesn\'t look like a DCI number. Try again, but with an actual number.' % dci_number
