@@ -1,4 +1,4 @@
-from errbot import BotPlugin, botcmd, re_botcmd
+from errbot import BotPlugin, botcmd
 import json
 import logging
 from os import getcwd
@@ -9,48 +9,45 @@ import requests
 from time import sleep
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
-logger = logging.getLogger(__name__) # TODO use self.log.info() / self.log.error() instead
+logger = logging.getLogger(__name__)  # TODO use self.log.info() / self.log.error() instead
+
 
 class Tradingpost(BotPlugin):
     '''Plugin that fetches MtG card pictures, oracle texts, prices and player's planeswalker points on request.'''
-    
-    def callback_mention(self, message, mentioned_people):
-        # TODO: add greeting
-        if self.bot_identifier in mentioned_people:
-            return '{}: use a command if you want my help.'.format(message.frm)
-    
+
     @botcmd
     def card(self, msg, args):
         '''I\'ll post a picture of the named card. :frame_with_picture:'''
         card = get_card(args)
         if card:
             self.send_card(title=card['name'],
-                body='{} ({})'.format(card['set_name'], card['set'].upper()),
-                image=card['image_uris']['normal'],
-                in_reply_to=msg)
+                           body='{} ({})'.format(card['set_name'], card['set'].upper()),
+                           image=card['image_uris']['normal'],
+                           in_reply_to=msg)
         else:
             return 'Card not found.'
- 
+
     @botcmd
     def joke(self, msg, args):
         '''Tells you a random joke. Warning: the jokes are really, really bad. :laughing:'''
         with open(join(__location__, 'jokes.json'), 'r') as infile:
             joke = random.choice(json.load(infile))
         yield joke['setup']
-        sleep(1) # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
+        sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
         yield joke['punchline']
-    
+
     @botcmd
     def oracle(self, msg, args):
         '''Returns the named card\'s oracle text. :book:'''
         card = get_card(args)
         if card:
-            txt = u'{} {}\n{}\n{}'.format(card['name'], card['mana_cost'], card['type_line'], card['oracle_text'])
-            if 'power' in card and 'toughness' in card:
-                txt += u'\n`{}/{}`'.format(card['power'], card['toughness'])
-            if 'loyalty' in card:
-                txt += u'\n`{}`'.format(card['loyalty'])
-            return emoji_filter(txt)
+            if 'card_faces' in card:
+                text = ''
+                for face in card['card_faces']:
+                    text += card_text(face)+'\n'
+                return text
+            else:
+                return card_text(card)
         else:
             return 'Card not found.'
     
@@ -69,22 +66,31 @@ class Tradingpost(BotPlugin):
                 return 'Unable to find any price information for {} ({})'.format(card['name'], card['set'])
         else:
             return 'Card not found.'
-    
+
     @botcmd
     def pwp(self, msg, args):
         '''Returns the PWP score and bye eligibility for a DCI number :trophy:'''
         return write_pwp(args)
-    
+
     @botcmd
     def roll(self, msg, args):
         '''Rolls a die with N sides; defaults to D6. :game_die:'''
         sides = 6 if args == '' else args
         if sides.isdigit():
             yield 'Rolled a {}-sided die, and the result is...'.format(sides)
-            sleep(1) # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
+            sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
             yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
         else:
             yield 'Please supply a valid number of sides.'
+
+
+def card_text(card):
+    txt = u'{} {}\n{}\n{}'.format(card['name'], card['mana_cost'], card['type_line'], card['oracle_text'])
+    if 'power' in card and 'toughness' in card:
+        txt += u'\n`{}/{}`'.format(card['power'], card['toughness'])
+    if 'loyalty' in card:
+        txt += u'\n`{}`'.format(card['loyalty'])
+    return emoji_filter(txt)
 
 
 def emoji_filter(input):
@@ -112,20 +118,22 @@ def find_index_of_sequence(data, sequence, start_index=0):
 
 
 def get_card(args):
-    match = search(r'\((.+)\)',args)
+    match = search(r'\((.+)\)', args)
     name = args.split('(')[0] if match else args
     preference = match.group(1) if match else None
     query_url = 'https://api.scryfall.com/cards/named?exact={}'.format(name)
     if preference:
         query_url += '&set={}'.format(preference)
-    logging.info(u'Connecting to http://api.scryfall.com')
-    r = requests.get(query_url)
-    try:
-        card = r.json()
-    except ValueError:
-        logging.error(u'No JSON object could be decoded from API response: %s' % r)
+    logging.info(u'Connecting to https://api.scryfall.com')
+    response = requests.get(query_url)
+    if response.status_code is 200:
+        try:
+            return response.json()
+        except ValueError:
+            logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
+            return None
+    else:
         return None
-    return card
 
 
 def get_seasons(dci_number):
@@ -138,24 +146,22 @@ def get_seasons(dci_number):
         'Accept-Language': 'en-US,en;q=0.8,de;q=0.6,sv;q=0.4',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': '*/*', 
+        'Accept': '*/*',
         'Cache-Control': 'no-cache',
         'X-Requested-With': 'XMLHttpRequest',
         'Cookie': 'f5_cspm=1234; BIGipServerWWWPWPPOOL01=353569034.20480.0000; __utmt=1; BIGipServerWWWPool1=3792701706.20480.0000; PlaneswalkerPointsSettings=0=0&lastviewed=9212399887; __utma=75931667.1475261136.1456488297.1456488297.1456488297.1; __utmb=75931667.5.10.1456488297; __utmc=75931667; __utmz=75931667.1456488297.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)',
         'Connection': 'keep-alive',
-        'Referer': 'http://www.wizards.com/Magic/PlaneswalkerPoints/%s' % dci_number
+        'Referer': 'http://www.wizards.com/Magic/PlaneswalkerPoints/{}'.format(dci_number)
     }
     data = {'Parameters': {'DCINumber': dci_number, 'SelectedType': 'Yearly'}}
     logging.info(u'Connecting to http://www.wizards.com')
     response = requests.post(url, headers=headers, data=json.dumps(data))
-
     if response.status_code is 200:
         seasons = []
         try:
             response_data = response.json()
             markup = response_data['ModalContent']
             search_position = markup.find('SeasonRange')
-
             while search_position != -1:
                 pointsvalue = 'PointsValue\">'
                 search_position = markup.find(pointsvalue, search_position)
@@ -166,25 +172,22 @@ def get_seasons(dci_number):
                     seasons.append(int(value))
                 search_position = markup.find('SeasonRange', search_position)
         except ValueError:
-            logging.error(u'No JSON object could be decoded from API response: %s' % response)
+            logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
             return 'Garbled response from backend. Please try again later.'
-
         try:
             return {'currentSeason': seasons[0], 'lastSeason': seasons[1]}
         except IndexError:
-            return 'DCI# %s not found.' % dci_number
+            return 'DCI# {} not found.'.format(dci_number)
     else:
-        logging.error(u'No response from API (HTTP code %i)' % response.status_code)
+        logging.error(u'No response from API (HTTP code {})'.format(response.status_code))
         return 'No response from backend. Please try again later.'
 
 
 def write_pwp(dci_number):
     if dci_number.isdigit():
         response = get_seasons(dci_number)
-        
         if isinstance(response, dict):
-            txt = ('DCI# %s has %s points in the current season, and %s points last season.\nCurrently ' % (dci_number, response['currentSeason'], response['lastSeason']))
-        
+            txt = 'DCI# {} has {} points in the current season, and {} points last season.\nCurrently '.format(dci_number, response['currentSeason'], response['lastSeason'])
             if response['currentSeason'] >= 2250 or response['lastSeason'] >= 2250:
                 txt += 'eligible for 2 GP byes.'
             elif response['currentSeason'] >= 1300 or response['lastSeason'] >= 1300:
@@ -195,4 +198,4 @@ def write_pwp(dci_number):
         else:
             return response
     else:
-        return '\'%s\' doesn\'t look like a DCI number. Try again, but with an actual number.' % dci_number
+        return '\'{}\' doesn\'t look like a DCI number. Try again, but with an actual number.'.format(dci_number)
