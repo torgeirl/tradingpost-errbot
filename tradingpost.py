@@ -4,6 +4,7 @@ import logging
 from os import getcwd
 from os.path import dirname, join, realpath
 import random
+from re import search
 import requests
 from time import sleep
 
@@ -11,7 +12,7 @@ __location__ = realpath(join(getcwd(), dirname(__file__)))
 logger = logging.getLogger(__name__) # TODO use self.log.info() / self.log.error() instead
 
 class Tradingpost(BotPlugin):
-    '''Event handler: looks for bot mentions and bot commands.'''
+    '''Plugin that fetches MtG card pictures, oracle texts, prices and player's planeswalker points on request.'''
     
     def callback_mention(self, message, mentioned_people):
         # TODO: add greeting
@@ -20,19 +21,19 @@ class Tradingpost(BotPlugin):
     
     @botcmd
     def card(self, msg, args):
+        '''I\'ll post a picture of the named card. :frame_with_picture:'''
         card = get_card(args)
         if card:
-            most_recent_printing = card['editions'][0]
             self.send_card(title=card['name'],
-                body='{} ({})'.format(most_recent_printing['set'], most_recent_printing['set_id']),
-                image=most_recent_printing['image_url'],
+                body='{} ({})'.format(card['set_name'], card['set'].upper()),
+                image=card['image_uris']['normal'],
                 in_reply_to=msg)
         else:
             return 'Card not found.'
-    
+ 
     @botcmd
     def joke(self, msg, args):
-        '''Warning: the jokes are really, really bad.'''
+        '''Tells you a random joke. Warning: the jokes are really, really bad. :laughing:'''
         with open(join(__location__, 'jokes.json'), 'r') as infile:
             joke = random.choice(json.load(infile))
         yield joke['setup']
@@ -41,19 +42,42 @@ class Tradingpost(BotPlugin):
     
     @botcmd
     def oracle(self, msg, args):
-        return write_oracle(args)
+        '''Returns the named card\'s oracle text. :book:'''
+        card = get_card(args)
+        if card:
+            txt = u'{} {}\n{}\n{}'.format(card['name'], card['mana_cost'], card['type_line'], card['oracle_text'])
+            if 'power' in card and 'toughness' in card:
+                txt += u'\n`{}/{}`'.format(card['power'], card['toughness'])
+            if 'loyalty' in card:
+                txt += u'\n`{}`'.format(card['loyalty'])
+            return emoji_filter(txt)
+        else:
+            return 'Card not found.'
     
     @botcmd
     def price(self, msg, args):
-        return write_price(args)
+        '''Returns the named card\'s current market prices. :moneybag:'''
+        card = get_card(args)
+        if card:
+            if 'usd' in card or 'eur' in card or 'tix' in card:
+                txt = 'Prices for {} ({}):\n'.format(card['name'], card['set'].upper())
+                txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
+                txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
+                txt += '{} Tix'.format(card['tix']) if 'tix' in card else 'n/a'
+                return txt
+            else:
+                return 'Unable to find any price information for {} ({})'.format(card['name'], card['set'])
+        else:
+            return 'Card not found.'
     
     @botcmd
     def pwp(self, msg, args):
+        '''Returns the PWP score and bye eligibility for a DCI number :trophy:'''
         return write_pwp(args)
     
     @botcmd
     def roll(self, msg, args):
-        '''Rolls a die with N sides; defaults to D6.'''
+        '''Rolls a die with N sides; defaults to D6. :game_die:'''
         sides = 6 if args == '' else args
         if sides.isdigit():
             yield 'Rolled a {}-sided die, and the result is...'.format(sides)
@@ -87,48 +111,21 @@ def find_index_of_sequence(data, sequence, start_index=0):
     return index + len(sequence[-1])
 
 
-def get_card(name):
-    query_url = 'http://api.deckbrew.com/mtg/cards?name=%s' % name
-    logging.info(u'Connecting to http://api.deckbrew.com')
+def get_card(args):
+    match = search(r'\((.+)\)',args)
+    name = args.split('(')[0] if match else args
+    preference = match.group(1) if match else None
+    query_url = 'https://api.scryfall.com/cards/named?exact={}'.format(name)
+    if preference:
+        query_url += '&set={}'.format(preference)
+    logging.info(u'Connecting to http://api.scryfall.com')
     r = requests.get(query_url)
     try:
-        cards = r.json()
+        card = r.json()
     except ValueError:
         logging.error(u'No JSON object could be decoded from API response: %s' % r)
         return None
-    
-    if len(cards) < 1:
-        return None
-    
-    card = None
-    for element in cards:
-        if element['name'].lower() == name.lower():
-            card = element
     return card
-
-
-def get_card_value(card_name, set_code):
-    url = 'http://www.mtggoldfish.com/widgets/autocard/%s [%s]' % (card_name, set_code)
-    headers = {
-        'Pragma': 'no-cache',
-        'Accept-Encoding': 'gzip, deflate, sdch',
-        'Accept-Language': 'en-US,en;q=0.8,de;q=0.6,sv;q=0.4',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36',
-        'Accept': 'text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01',
-        'Referer': 'http://www.mtggoldfish.com/widgets/autocard/%s' % card_name,
-        'X-Requested-With': 'XMLHttpRequest',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'no-cache'
-    }
-    logging.info(u'Connecting to http://www.mtggoldfish.com')
-    response = requests.get(url, headers=headers)
-    index = find_index_of_sequence(response.content.decode('utf-8'), ['tcgplayer', 'btn-shop-price', '$'])
-    end_index = response.content.decode('utf-8').find('\\n', index)
-    try:
-        value = float(response.content.decode('utf-8')[index + 2:end_index].replace(',', ''))
-    except ValueError:
-        value = 0
-    return value
 
 
 def get_seasons(dci_number):
@@ -179,49 +176,6 @@ def get_seasons(dci_number):
     else:
         logging.error(u'No response from API (HTTP code %i)' % response.status_code)
         return 'No response from backend. Please try again later.'
-
-
-def write_oracle(search_term):
-    # TODO: make cardname and p/t strong (* gives issue with emoji_filter)
-    card = get_card(search_term)
-    
-    if card:
-        typeline = ''
-        if 'supertypes' in card:
-            for supertype in card['supertypes']:
-                typeline += supertype.capitalize() + ' '
-        if 'types' in card:
-            for cardtype in card['types']:
-                typeline += cardtype.capitalize() + ' '
-        if 'subtypes' in card:
-            typeline += '- '
-            for subtype in card['subtypes']:
-                typeline += subtype.capitalize() + ' '
-        txt = u'%s %s\n%s\n%s' % (card['name'], card['cost'], typeline, card['text'])
-        if 'power' in card and 'toughness' in card:
-            txt += u'\n`%s/%s`' % (card['power'], card['toughness'])
-        if 'loyalty' in card:
-            txt += u'\n`%s`' % card['loyalty']
-        return emoji_filter(txt)
-    else:
-        return 'Card not found.'
-
-
-def write_price(search_term):
-    card = get_card(search_term)
-    
-    if card:
-        # TODO: this doesn't always return the newest, and if it does not always the price
-        # TODO: replace backend
-        most_recent_printing = card['editions'][0]
-        card['value'] = get_card_value(card['name'], most_recent_printing['set_id'])
-        txt = 'Unable to find price information for %s' % card['name']
-        if card['value'] > 0:
-            txt = 'Current market price for most recent printing of {} ({}) - ${}'.format(
-                card['name'], most_recent_printing['set'], card['value'])
-        return txt
-    else:
-        return 'Card not found.'
 
 
 def write_pwp(dci_number):
