@@ -57,7 +57,7 @@ class Tradingpost(BotPlugin):
         card = get_card(args)
         if card:
             if 'usd' in card or 'eur' in card or 'tix' in card:
-                txt = 'Prices for {} ({}):\n'.format(card['name'], card['set'].upper())
+                txt = 'Prices for {} from {} ({}):\n'.format(card['name'], card['set_name'], card['set'].upper())
                 txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
                 txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
                 txt += '{} Tix'.format(card['tix']) if 'tix' in card else 'n/a'
@@ -75,13 +75,13 @@ class Tradingpost(BotPlugin):
     @botcmd
     def roll(self, msg, args):
         '''Rolls a die with N sides; defaults to D6. :game_die:'''
-        sides = 6 if args == '' else args
-        if sides.isdigit():
+        sides = '6' if args == '' else args
+        if sides.isdigit() and int(sides) > 1:
             yield 'Rolled a {}-sided die, and the result is...'.format(sides)
             sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
             yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
         else:
-            yield 'Please supply a valid number of sides.'
+            yield 'Please supply a valid number sufficient for rolling (2+).'
 
 
 def card_text(card):
