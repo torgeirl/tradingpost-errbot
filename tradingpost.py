@@ -28,6 +28,11 @@ class Tradingpost(BotPlugin):
             return 'Card not found.'
 
     @botcmd
+    def coinflip(self, msg, args):
+        '''Need to toss a coin in these cash-free times? Look no further.'''
+        return '{coin}!'.format(coin='HEADS' if random.randint(0, 1) == 1 else 'TAILS')
+
+    @botcmd
     def joke(self, msg, args):
         '''Tells you a random joke. Warning: the jokes are really, really bad. :laughing:'''
         with open(join(__location__, 'jokes.json'), 'r') as infile:
@@ -81,7 +86,7 @@ class Tradingpost(BotPlugin):
             sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
             yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
         else:
-            yield 'Please supply a valid number sufficient for rolling (2+).'
+            yield 'Please supply a valid number sufficient for rolling (2 or more).'
 
 
 def card_text(card):
