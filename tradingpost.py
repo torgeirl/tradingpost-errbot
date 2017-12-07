@@ -47,7 +47,7 @@ class Tradingpost(BotPlugin):
         card = get_card(args)
         if card:
             if 'card_faces' in card:
-                return '\n\n----\n'.join(card_text(face) for face in card['card_faces'])
+                return '\n--\n'.join(card_text(face) for face in card['card_faces'])
             else:
                 return card_text(card)
         else:
