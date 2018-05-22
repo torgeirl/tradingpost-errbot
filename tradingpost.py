@@ -20,10 +20,18 @@ class Tradingpost(BotPlugin):
         '''I\'ll post a picture of the named card. :frame_with_picture:'''
         card = get_card(args)
         if card:
-            self.send_card(title=card['name'],
-                           body='{} ({})'.format(card['set_name'], card['set'].upper()),
-                           image=card['image_uris']['normal'],
-                           in_reply_to=msg)
+            body = '{} ({})'.format(card['set_name'], card['set'].upper())
+            if 'card_faces' in card:
+                for face in card['card_faces']:
+                    self.send_card(title=face['name'],
+                                   body=body,
+                                   image=face['image_uris']['normal'],
+                                   in_reply_to=msg)
+            else:
+                self.send_card(title=card['name'],
+                               body=body,
+                               image=card['image_uris']['normal'],
+                               in_reply_to=msg)
         else:
             return 'Card not found.'
 
