@@ -21,7 +21,7 @@ class Tradingpost(BotPlugin):
         card = get_card(args)
         if card:
             body = '{} ({})'.format(card['set_name'], card['set'].upper())
-            if 'card_faces' in card:
+            if card['layout'] == 'transform':
                 for face in card['card_faces']:
                     self.send_card(title=face['name'],
                                    body=body,
