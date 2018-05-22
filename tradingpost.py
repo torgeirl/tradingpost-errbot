@@ -27,8 +27,6 @@ class Tradingpost(BotPlugin):
                                body='{} ({})'.format(card['set_name'], card['set'].upper()),
                                image=card['image_uris']['normal'],
                                in_reply_to=msg)
-            else:
-                return card_image(card, msg)
         else:
             return 'Card not found.'
 
