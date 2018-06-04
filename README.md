@@ -28,7 +28,7 @@ Create a systemd file similar to [self-assembler-bot](https://github.com/torgeir
 
 `ExecStart=/home/username/errbot-rocketchat/venv/bin/python -m errbot.cli`
 
-`WorkingDirectory=/home/username/errbot-rocketchat/src/aoikrocketchaterrbot`.
+`WorkingDirectory=/home/username/errbot-rocketchat/src/aoikrocketchaterrbot`
 
 ## Credits
 tradingpost-errbot is a port of [tradingpost-beepboop](https://github.com/torgeirl/tradingpost-beepboop), a [BeepBoop](https://beepboophq.com/docs/article/overview)-hostable Slack bot. I got the inspiration to make tradingpost-beepboop after seeing Filip Söderholm's [cardfetcher bot](https://github.com/fiso/cardfetcher) in action, and I have re-used part of his code while making Tradingpost.
