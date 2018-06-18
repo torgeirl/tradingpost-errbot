@@ -53,7 +53,7 @@ class Tradingpost(BotPlugin):
     def list(self, msg, args):
         '''Lists all prints of a card.'''
         prints = get_card(args, listing=True)
-        if prints:
+        if prints and prints['total_cards'] < 50:
             txt = ''
             for 'card' in prints:
                 txt = '{} ({}): '.format(card['name'], card['set_name'], card['set'].upper())
@@ -146,9 +146,9 @@ def get_card(args, listing=False):
     match = search(r'\((.+)\)', args)
     name = args.split('(')[0] if match else args
     preference = match.group(1) if match else None
-    mode = 'search?unique=prints&q' if listing else 'named?exact'
-    query_url = 'https://api.scryfall.com/cards/{}={}'.format(mode, name)
-    if preference and not duplicates:
+    mode = 'search?unique=prints&q=!' if listing else 'named?exact='
+    query_url = 'https://api.scryfall.com/cards/{}{}'.format(mode, name)
+    if preference and not listing:
         query_url += '&set={}'.format(preference)
     logging.info(u'Connecting to https://api.scryfall.com')
     response = requests.get(query_url)
