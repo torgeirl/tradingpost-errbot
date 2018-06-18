@@ -55,7 +55,7 @@ class Tradingpost(BotPlugin):
         prints = get_card(args, listing=True)
         if prints and prints['total_cards'] < 50:
             txt = ''
-            for 'card' in prints['data']:
+            for card in prints['data']:
                 txt += '{} ({}): '.format(card['set_name'], card['set'].upper())
                 txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
                 txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
