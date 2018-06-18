@@ -50,6 +50,21 @@ class Tradingpost(BotPlugin):
         yield joke['punchline']
 
     @botcmd
+    def list(self, msg, args):
+        '''Lists all prints of a card.'''
+        prints = get_card(args, listing=True)
+        if prints:
+            txt = ''
+            for 'card' in prints:
+                txt = '{} ({}): '.format(card['name'], card['set_name'], card['set'].upper())
+                txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
+                txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
+                txt += '{} Tix\n'.format(card['tix']) if 'tix' in card else 'n/a'
+            return txt
+        else:
+            return 'Card not found.'
+
+    @botcmd
     def oracle(self, msg, args):
         '''Returns the named card\'s oracle text. :book:'''
         card = get_card(args)
@@ -127,12 +142,13 @@ def find_index_of_sequence(data, sequence, start_index=0):
     return index + len(sequence[-1])
 
 
-def get_card(args):
+def get_card(args, listing=False):
     match = search(r'\((.+)\)', args)
     name = args.split('(')[0] if match else args
     preference = match.group(1) if match else None
-    query_url = 'https://api.scryfall.com/cards/named?exact={}'.format(name)
-    if preference:
+    mode = 'search?unique=prints&q' if listing else 'named?exact'
+    query_url = 'https://api.scryfall.com/cards/{}={}'.format(mode, name)
+    if preference and not duplicates:
         query_url += '&set={}'.format(preference)
     logging.info(u'Connecting to https://api.scryfall.com')
     response = requests.get(query_url)
