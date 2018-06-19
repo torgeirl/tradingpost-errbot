@@ -53,14 +53,17 @@ class Tradingpost(BotPlugin):
     def list(self, msg, args):
         '''Lists all prints of a card.'''
         prints = get_card(args, listing=True)
-        if prints and prints['total_cards'] < 50:
-            txt = ''
-            for card in prints['data']:
-                txt += '{} ({}): '.format(card['set_name'], card['set'].upper())
-                txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
-                txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
-                txt += '{} Tix\n'.format(card['tix']) if 'tix' in card else 'n/a\n'
-            return txt
+        if prints:
+            if prints['total_cards'] < 50:
+                txt = 'Printings of {} ({}):\n'.format(prints['data'][0]['name'], prints['total_cards'])
+                for card in prints['data']:
+                    txt += '{} ({}): '.format(card['set_name'], card['set'].upper())
+                    txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
+                    txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
+                    txt += '{} Tix\n'.format(card['tix']) if 'tix' in card else 'n/a\n'
+                return txt
+            else:
+                return 'Too many reprints ({})'.format(prints['total_cards'])
         else:
             return 'Card not found.'
 
@@ -146,8 +149,8 @@ def get_card(args, listing=False):
     match = search(r'\((.+)\)', args)
     name = args.split('(')[0] if match else args
     preference = match.group(1) if match else None
-    mode = 'search?unique=prints&q=!' if listing else 'named?exact='
-    query_url = 'https://api.scryfall.com/cards/{}{}'.format(mode, name)
+    mode = 'search?unique=prints&order=released&q=!"{}"' if listing else 'named?exact={}'
+    query_url = 'https://api.scryfall.com/cards/{}'.format(mode).format(name)
     if preference and not listing:
         query_url += '&set={}'.format(preference)
     logging.info(u'Connecting to https://api.scryfall.com')
