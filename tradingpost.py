@@ -57,7 +57,7 @@ class Tradingpost(BotPlugin):
             if prints['total_cards'] < 50:
                 txt = 'Printings of {} ({}):\n'.format(prints['data'][0]['name'], prints['total_cards'])
                 for card in prints['data']:
-                    txt += '{} ({}): '.format(card['set_name'], card['set'].upper())
+                    txt += '•{} ({}): '.format(card['set_name'], card['set'].upper())
                     txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
                     txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
                     txt += '{} Tix\n'.format(card['tix']) if 'tix' in card else 'n/a\n'
@@ -118,11 +118,13 @@ class Tradingpost(BotPlugin):
         if card:
            rulings = get_card_rulings(card['id'])
            if rulings:
-                txt = 'Rulings for {} ({}):\n'.format(card['name'], len(rulings['data'])
+                counter = 0
+                txt = ''
                 for rule in rulings['data']:
-                    if rule['source'] is 'wotc':
-                        txt += '{} ({})'.format(rule['comment'], rule['published_at'])
-                return txt
+                    if rule['source'] == 'wotc':
+                        counter++
+                        txt += '\n• {} ({})'.format(rule['comment'], rule['published_at'])
+                return 'Rulings for {} ({}):{}'.format(card['name'], counter, txt)
            else:
                return 'Couldn\'t find any rulings for {}.'.format(card['name'])
         else:
