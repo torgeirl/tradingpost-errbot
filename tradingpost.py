@@ -51,7 +51,7 @@ class Tradingpost(BotPlugin):
 
     @botcmd
     def list(self, msg, args):
-        '''Lists all prints of a card.'''
+        '''Lists all printings of a card.'''
         prints = get_card(args, listing=True)
         if prints:
             if prints['total_cards'] < 50:
@@ -69,7 +69,7 @@ class Tradingpost(BotPlugin):
 
     @botcmd
     def oracle(self, msg, args):
-        '''Returns the named card\'s oracle text. :book:'''
+        '''Fetches the named card\'s oracle text. :book:'''
         card = get_card(args)
         if card:
             if 'card_faces' in card:
@@ -81,7 +81,7 @@ class Tradingpost(BotPlugin):
     
     @botcmd
     def price(self, msg, args):
-        '''Returns the named card\'s current market prices. :moneybag:'''
+        '''Fetches the named card\'s current market prices. :moneybag:'''
         card = get_card(args)
         if card:
             if 'usd' in card or 'eur' in card or 'tix' in card:
@@ -97,7 +97,7 @@ class Tradingpost(BotPlugin):
 
     @botcmd
     def pwp(self, msg, args):
-        '''Returns the PWP score and bye eligibility for a DCI number :trophy:'''
+        '''Fetches the PWP score and bye eligibility for a DCI number :trophy:'''
         return write_pwp(args)
 
     @botcmd
@@ -110,6 +110,23 @@ class Tradingpost(BotPlugin):
             yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
         else:
             yield 'Please supply a valid number sufficient for rolling (2 or more).'
+
+    @botcmd
+    def rulings(self, msg, args):
+        '''Fetches the official rulings for the card. :scales:'''
+        card = get_card(args)
+        if card:
+           rulings = get_card_rulings(card['id'])
+           if rulings:
+                txt = 'Rulings for {} ({}):\n'.format(card['name'], len(rulings['data'])
+                for rule in rulings['data']:
+                    if rule['source'] is 'wotc':
+                        txt += '{} ({})'.format(rule['comment'], rule['published_at'])
+                return txt
+           else:
+               return 'Couldn\'t find any rulings for {}.'.format(card['name'])
+        else:
+            return 'Card not found.'
 
 
 def card_text(card):
@@ -153,6 +170,20 @@ def get_card(args, listing=False):
     query_url = 'https://api.scryfall.com/cards/{}'.format(mode).format(name)
     if preference and not listing:
         query_url += '&set={}'.format(preference)
+    logging.info(u'Connecting to https://api.scryfall.com')
+    response = requests.get(query_url)
+    if response.status_code is 200:
+        try:
+            return response.json()
+        except ValueError:
+            logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
+            return None
+    else:
+        return None
+
+
+def get_card_rulings(scryfall_id):
+    query_url = 'https://api.scryfall.com/cards/{}/rulings'.format(scryfall_id)
     logging.info(u'Connecting to https://api.scryfall.com')
     response = requests.get(query_url)
     if response.status_code is 200:
