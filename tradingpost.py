@@ -122,7 +122,7 @@ class Tradingpost(BotPlugin):
                 txt = ''
                 for rule in rulings['data']:
                     if rule['source'] == 'wotc':
-                        counter++
+                        counter += 1
                         txt += '\n• {} ({})'.format(rule['comment'], rule['published_at'])
                 return 'Rulings for {} ({}):{}'.format(card['name'], counter, txt)
            else:
