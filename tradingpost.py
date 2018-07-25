@@ -124,7 +124,10 @@ class Tradingpost(BotPlugin):
                     if rule['source'] == 'wotc':
                         counter += 1
                         txt += '\n• {} ({})'.format(rule['comment'], rule['published_at'])
-                return 'Rulings for {} ({}):{}'.format(card['name'], counter, txt)
+                if counter > 0:
+                    return 'Rulings for {} ({}):{}'.format(card['name'], counter, txt)
+                else:
+                    return 'There are no official rulings for {}.'.format(card['name'])
            else:
                return 'Couldn\'t find any rulings for {}.'.format(card['name'])
         else:
