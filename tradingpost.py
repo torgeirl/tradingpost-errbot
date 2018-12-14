@@ -98,7 +98,9 @@ class Tradingpost(BotPlugin):
     @botcmd
     def pwp(self, msg, args):
         '''Fetches the PWP score and bye eligibility for a DCI number :trophy:'''
-        return write_pwp(args)
+        if args.isdigit() and 0 < len(args) <= 18:
+            return write_pwp(args)
+        return '\'{}\' doesn\'t look like a DCI number. Try again, but with an actual number.'.format(args)
 
     @botcmd
     def roll(self, msg, args):
@@ -249,18 +251,15 @@ def get_seasons(dci_number):
 
 
 def write_pwp(dci_number):
-    if dci_number.isdigit():
-        response = get_seasons(dci_number)
-        if isinstance(response, dict):
-            txt = 'DCI# {} has {} points in the current season, and {} points last season.\nCurrently '.format(dci_number, response['currentSeason'], response['lastSeason'])
-            if response['currentSeason'] >= 2250 or response['lastSeason'] >= 2250:
-                txt += 'eligible for 2 GP byes.'
-            elif response['currentSeason'] >= 1300 or response['lastSeason'] >= 1300:
-                txt += 'eligible for 1 GP bye.'
-            else:
-                txt += 'not eligible for GP byes.'
-            return txt
+    response = get_seasons(dci_number)
+    if isinstance(response, dict):
+        txt = 'DCI# {} has {} points in the current season, and {} points last season.\nCurrently '.format(dci_number, response['currentSeason'], response['lastSeason'])
+        if response['currentSeason'] >= 2250 or response['lastSeason'] >= 2250:
+            txt += 'eligible for 2 GP byes.'
+        elif response['currentSeason'] >= 1300 or response['lastSeason'] >= 1300:
+            txt += 'eligible for 1 GP bye.'
         else:
-            return response
+            txt += 'not eligible for GP byes.'
+        return txt
     else:
-        return '\'{}\' doesn\'t look like a DCI number. Try again, but with an actual number.'.format(dci_number)
+        return response
