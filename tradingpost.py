@@ -58,9 +58,10 @@ class Tradingpost(BotPlugin):
                 txt = 'Printings of {} ({}):\n'.format(prints['data'][0]['name'], prints['total_cards'])
                 for card in prints['data']:
                     txt += '•{} ({}): '.format(card['set_name'], card['set'].upper())
-                    txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
-                    txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
-                    txt += '{} Tix\n'.format(card['tix']) if 'tix' in card else 'n/a\n'
+                    txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
+                    txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
+                    txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
+                    txt += ' — 1 wildcard\n' if 'arena' in card['games'] else '\n'
                 return txt
             else:
                 return 'Too many reprints ({})'.format(prints['total_cards'])
@@ -84,11 +85,12 @@ class Tradingpost(BotPlugin):
         '''Fetches the named card\'s current market prices. :moneybag:'''
         card = get_card(args)
         if card:
-            if 'usd' in card or 'eur' in card or 'tix' in card:
+            if 'usd' in card or 'eur' in card or 'tix' in card['prices']:
                 txt = 'Prices for {} from {} ({}):\n'.format(card['name'], card['set_name'], card['set'].upper())
-                txt += '${} — '.format(card['usd']) if 'usd' in card else 'n/a — '
-                txt += '€{} — '.format(card['eur']) if 'eur' in card else 'n/a — '
-                txt += '{} Tix'.format(card['tix']) if 'tix' in card else 'n/a'
+                txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
+                txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
+                txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
+                txt += ' — 1 wildcard' if 'arena' in card['games'] else ''
                 return txt
             else:
                 return 'Unable to find any price information for {} ({})'.format(card['name'], card['set'])
