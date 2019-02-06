@@ -61,7 +61,7 @@ class Tradingpost(BotPlugin):
                     txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
                     txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
                     txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
-                    txt += ' — 1 wildcard\n' if 'arena' in card['games'] else '\n'
+                    txt += ' — 1 {} wildcard\n'.format(card['rarity']) if 'arena' in card['games'] else '\n'
                 return txt
             else:
                 return 'Too many reprints ({})'.format(prints['total_cards'])
@@ -90,7 +90,7 @@ class Tradingpost(BotPlugin):
                 txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
                 txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
                 txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
-                txt += ' — 1 wildcard' if 'arena' in card['games'] else ''
+                txt += ' — 1 {} wildcard'.format(card['rarity']) if 'arena' in card['games'] else ''
                 return txt
             else:
                 return 'Unable to find any price information for {} ({})'.format(card['name'], card['set'])
