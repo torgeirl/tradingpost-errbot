@@ -43,7 +43,7 @@ class Tradingpost(BotPlugin):
     @botcmd
     def joke(self, msg, args):
         '''Tells you a random joke. Warning: the jokes are really, really bad. :laughing:'''
-        with open(join(__location__, 'jokes.json'), 'r') as infile:
+        with open(join(__location__, 'assets/jokes.json'), 'r') as infile:
             joke = random.choice(json.load(infile))
         yield joke['setup']
         sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
