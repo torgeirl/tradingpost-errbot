@@ -1,15 +1,18 @@
 from errbot import BotPlugin, botcmd
-import json
+from json import dumps as json_dumps, load as json_load
 import logging
 from os import getcwd
 from os.path import dirname, join, realpath
-import random
-from re import search
-import requests
+from random import choice as random_choice, randint as random_randint
+from re import search as re_search
+from requests import get as requests_get, post as requests_post
+from tempfile import TemporaryFile
 from time import sleep
 
+from PIL import Image
+
 __location__ = realpath(join(getcwd(), dirname(__file__)))
-logger = logging.getLogger(__name__)  # TODO use self.log.info() / self.log.error() instead
+logger = logging.getLogger(__name__)
 
 
 class Tradingpost(BotPlugin):
@@ -38,13 +41,13 @@ class Tradingpost(BotPlugin):
     @botcmd
     def coinflip(self, msg, args):
         '''Need to toss a coin in these cash-free times? Look no further.'''
-        return '{coin}!'.format(coin='HEADS' if random.randint(0, 1) == 1 else 'TAILS')
+        return 'HEADS!' if random_randint(0, 1) else 'TAILS!'
 
     @botcmd
     def joke(self, msg, args):
         '''Tells you a random joke. Warning: the jokes are really, really bad. :laughing:'''
         with open(join(__location__, 'assets/jokes.json'), 'r') as infile:
-            joke = random.choice(json.load(infile))
+            joke = random_choice(json_load(infile))
         yield joke['setup']
         sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
         yield joke['punchline']
@@ -111,7 +114,7 @@ class Tradingpost(BotPlugin):
         if sides.isdigit() and int(sides) > 1:
             yield 'Rolled a {}-sided die, and the result is...'.format(sides)
             sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
-            yield '... {}! :game_die:'.format(random.randint(1, int(sides)))
+            yield '... {}! :game_die:'.format(random_randint(1, int(sides)))
         else:
             yield 'Please supply a valid number sufficient for rolling (2 or more).'
 
@@ -136,6 +139,26 @@ class Tradingpost(BotPlugin):
                return 'Couldn\'t find any rulings for {}.'.format(card['name'])
         else:
             return 'Card not found.'
+
+    @botcmd
+    def sutcliffe(self, msg, args):
+        '''Sutcliffe meme generator. :hand: / :point_right:'''
+        syntax = '!sutcliffe cardname A / cardname B'
+        try:
+            card1, card2 = args.split('/')
+        except ValueError:
+            return 'Argument error (expected \'{}\')'.format(syntax)
+        card_images = []
+        for e in card1, card2:
+            card = get_card(e)
+            if card:
+                card_images.append(card['image_uris']['normal']) # 488*680 (w*h)
+            else:
+                return 'Card \'{}\' not found.'.format(card)
+        # TODO TemporaryFile
+        # TODO PIL
+        # TODO try/except self.send_stream_request()
+        return ' / '.join(card_images)
 
 
 def card_text(card):
@@ -172,7 +195,7 @@ def find_index_of_sequence(data, sequence, start_index=0):
 
 
 def get_card(args, listing=False):
-    match = search(r'\((.+)\)', args)
+    match = re_search(r'\((.+)\)', args)
     name = args.split('(')[0] if match else args
     preference = match.group(1) if match else None
     mode = 'search?unique=prints&order=released&q=!"{}"' if listing else 'named?exact={}'
@@ -180,7 +203,7 @@ def get_card(args, listing=False):
     if preference and not listing:
         query_url += '&set={}'.format(preference)
     logging.info(u'Connecting to https://api.scryfall.com')
-    response = requests.get(query_url)
+    response = requests_get(query_url)
     if response.status_code is 200:
         try:
             return response.json()
@@ -194,7 +217,7 @@ def get_card(args, listing=False):
 def get_card_rulings(scryfall_id):
     query_url = 'https://api.scryfall.com/cards/{}/rulings'.format(scryfall_id)
     logging.info(u'Connecting to https://api.scryfall.com')
-    response = requests.get(query_url)
+    response = requests_get(query_url)
     if response.status_code is 200:
         try:
             return response.json()
@@ -224,7 +247,7 @@ def get_seasons(dci_number):
     }
     data = {'Parameters': {'DCINumber': dci_number, 'SelectedType': 'Yearly'}}
     logging.info(u'Connecting to http://www.wizards.com')
-    response = requests.post(url, headers=headers, data=json.dumps(data))
+    response = requests_post(url, headers=headers, data=json_dumps(data))
     if response.status_code is 200:
         seasons = []
         try:
