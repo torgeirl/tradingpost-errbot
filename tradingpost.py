@@ -41,7 +41,7 @@ class Tradingpost(BotPlugin):
     @botcmd
     def coinflip(self, msg, args):
         '''Need to toss a coin in these cash-free times? Look no further.'''
-        return 'HEADS!' if random_randint(0, 1) else 'TAILS!'
+        return random_choice(['HEADS!', 'TAILS!'])
 
     @botcmd
     def joke(self, msg, args):
@@ -149,12 +149,12 @@ class Tradingpost(BotPlugin):
         except ValueError:
             return 'Argument error (expected \'{}\')'.format(syntax)
         card_images = []
-        for e in card1, card2:
-            card = get_card(e)
+        for name in card1, card2:
+            card = get_card(name)
             if card:
                 card_images.append(card['image_uris']['normal']) # 488*680 (w*h)
             else:
-                return 'Card \'{}\' not found.'.format(card)
+                return 'Card \'{}\' not found.'.format(name)
         # TODO TemporaryFile
         # TODO PIL
         # TODO try/except self.send_stream_request()
