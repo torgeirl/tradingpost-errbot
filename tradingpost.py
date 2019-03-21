@@ -8,6 +8,7 @@ from re import search as re_search
 from requests import get as requests_get, post as requests_post
 from tempfile import TemporaryFile
 from time import sleep
+from io import BytesIO
 
 from PIL import Image
 
@@ -21,22 +22,23 @@ class Tradingpost(BotPlugin):
     @botcmd
     def card(self, msg, args):
         '''I\'ll post a picture of the named card. :frame_with_picture:'''
-        card = get_card(args)
-        if card:
-            body = '{} ({})'.format(card['set_name'], card['set'].upper())
-            if card['layout'] == 'transform':
-                for face in card['card_faces']:
-                    self.send_card(title=face['name'],
-                                   body=body,
-                                   image=face['image_uris']['normal'],
-                                   in_reply_to=msg)
-            else:
-                self.send_card(title=card['name'],
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            return e.msg
+
+        body = '{} ({})'.format(card['set_name'], card['set'].upper())
+        if card['layout'] == 'transform':
+            for face in card['card_faces']:
+                self.send_card(title=face['name'],
                                body=body,
-                               image=card['image_uris']['normal'],
+                               image=face['image_uris']['normal'],
                                in_reply_to=msg)
         else:
-            return 'Card not found.'
+            self.send_card(title=card['name'],
+                           body=body,
+                           image=card['image_uris']['normal'],
+                           in_reply_to=msg)
 
     @botcmd
     def coinflip(self, msg, args):
@@ -55,50 +57,52 @@ class Tradingpost(BotPlugin):
     @botcmd
     def list(self, msg, args):
         '''Lists all printings of a card.'''
-        prints = get_card(args, listing=True)
-        if prints:
-            if prints['total_cards'] < 50:
-                txt = 'Printings of {} ({}):\n'.format(prints['data'][0]['name'], prints['total_cards'])
-                for card in prints['data']:
-                    txt += '•{} ({}): '.format(card['set_name'], card['set'].upper())
-                    txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
-                    txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
-                    txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
-                    txt += ' — 1 {} wildcard\n'.format(card['rarity']) if 'arena' in card['games'] else '\n'
-                return txt
-            else:
-                return 'Too many reprints ({})'.format(prints['total_cards'])
+        try:
+            prints = get_card(args, listing=True)
+        except CardNotFoundException as e:
+            return e.msg
+        if prints['total_cards'] < 50:
+            txt = 'Printings of {} ({}):\n'.format(prints['data'][0]['name'], prints['total_cards'])
+            for card in prints['data']:
+                txt += '•{} ({}): '.format(card['set_name'], card['set'].upper())
+                txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
+                txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
+                txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
+                txt += ' — 1 {} wildcard\n'.format(card['rarity']) if 'arena' in card['games'] else '\n'
+            return txt
         else:
-            return 'Card not found.'
+            return 'Too many reprints ({})'.format(prints['total_cards'])
 
     @botcmd
     def oracle(self, msg, args):
         '''Fetches the named card\'s oracle text. :book:'''
-        card = get_card(args)
-        if card:
-            if 'card_faces' in card:
-                return '\n--\n'.join(card_text(face) for face in card['card_faces'])
-            else:
-                return card_text(card)
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            return e.msg
+
+        if 'card_faces' in card:
+            return '\n--\n'.join(card_text(face) for face in card['card_faces'])
         else:
-            return 'Card not found.'
-    
+            return card_text(card)
+
     @botcmd
     def price(self, msg, args):
         '''Fetches the named card\'s current market prices. :moneybag:'''
-        card = get_card(args)
-        if card:
-            if 'usd' in card or 'eur' in card or 'tix' in card['prices']:
-                txt = 'Prices for {} from {} ({}):\n'.format(card['name'], card['set_name'], card['set'].upper())
-                txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
-                txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
-                txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
-                txt += ' — 1 {} wildcard'.format(card['rarity']) if 'arena' in card['games'] else ''
-                return txt
-            else:
-                return 'Unable to find any price information for {} ({})'.format(card['name'], card['set'])
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            e.msg
+
+        if 'usd' in card or 'eur' in card or 'tix' in card['prices']:
+            txt = 'Prices for {} from {} ({}):\n'.format(card['name'], card['set_name'], card['set'].upper())
+            txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
+            txt += '€{} — '.format(card['prices']['eur']) if card['prices']['eur'] else 'n/a — '
+            txt += '{} Tix'.format(card['prices']['tix']) if card['prices']['tix'] else 'n/a'
+            txt += ' — 1 {} wildcard'.format(card['rarity']) if 'arena' in card['games'] else ''
+            return txt
         else:
-            return 'Card not found.'
+            return 'Unable to find any price information for {} ({})'.format(card['name'], card['set'])
 
     @botcmd
     def pwp(self, msg, args):
@@ -121,24 +125,24 @@ class Tradingpost(BotPlugin):
     @botcmd
     def rulings(self, msg, args):
         '''Fetches the official rulings for the card. :scales:'''
-        card = get_card(args)
-        if card:
-           rulings = get_card_rulings(card['id'])
-           if rulings:
-                counter = 0
-                txt = ''
-                for rule in rulings['data']:
-                    if rule['source'] == 'wotc':
-                        counter += 1
-                        txt += '\n• {} ({})'.format(rule['comment'], rule['published_at'])
-                if counter > 0:
-                    return 'Rulings for {} ({}):{}'.format(card['name'], counter, txt)
-                else:
-                    return 'There are no official rulings for {}.'.format(card['name'])
-           else:
-               return 'Couldn\'t find any rulings for {}.'.format(card['name'])
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            return e.msg
+        rulings = get_card_rulings(card['id'])
+        if rulings:
+            counter = 0
+            txt = ''
+            for rule in rulings['data']:
+                if rule['source'] == 'wotc':
+                    counter += 1
+                    txt += '\n• {} ({})'.format(rule['comment'], rule['published_at'])
+            if counter > 0:
+                return 'Rulings for {} ({}):{}'.format(card['name'], counter, txt)
+            else:
+                return 'There are no official rulings for {}.'.format(card['name'])
         else:
-            return 'Card not found.'
+            return 'Couldn\'t find any rulings for {}.'.format(card['name'])
 
     @botcmd
     def sutcliffe(self, msg, args):
@@ -149,16 +153,28 @@ class Tradingpost(BotPlugin):
         except ValueError:
             return 'Argument error (expected \'{}\')'.format(syntax)
         card_images = []
-        for name in card1, card2:
-            card = get_card(name)
-            if card:
-                card_images.append(card['image_uris']['normal']) # 488*680 (w*h)
-            else:
-                return 'Card \'{}\' not found.'.format(name)
-        # TODO TemporaryFile
-        # TODO PIL
-        # TODO try/except self.send_stream_request()
-        return ' / '.join(card_images)
+        try:
+            image1 = download_card_image(card1)
+            image2 = download_card_image(card2)
+        except CardNotFoundException as e:
+            return e.msg
+
+        sutcliffe_template = Image.open('plugins/tradingpost-errbot/assets/sutcliffe-canvas.png')
+
+        card_positions = ((490, 25), (490, 435))
+
+        sutcliffe_template.paste(image1, box=card_positions[0])
+        sutcliffe_template.paste(image2, box=card_positions[1])
+
+        sutcliffe_bytes = BytesIO()
+        sutcliffe_template.save(sutcliffe_bytes, format='PNG')
+
+        self.send_stream_request(msg.frm, sutcliffe_bytes)
+
+
+class CardNotFoundException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
 
 
 def card_text(card):
@@ -209,9 +225,9 @@ def get_card(args, listing=False):
             return response.json()
         except ValueError:
             logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
-            return None
+            raise CardNotFoundException("Card '{}' not found.".format(name))
     else:
-        return None
+        raise CardNotFoundException("Card '{}' not found.".format(name))
 
 
 def get_card_rulings(scryfall_id):
@@ -288,3 +304,10 @@ def write_pwp(dci_number):
         return txt
     else:
         return response
+
+def download_card_image(cardname):
+    card = get_card(cardname)
+    image_url = card['image_uris']['normal'] # 488*680 (w*h)
+    image = Image.open(BytesIO(requests_get(image_url).content))
+    resize_ratio = min((0.5 * 488) / image.width, (0.5 * 680) / image.height)
+    return image.resize((int(image.width*resize_ratio), int(image.height*resize_ratio)), Image.ANTIALIAS)
