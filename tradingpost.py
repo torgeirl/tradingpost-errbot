@@ -1,4 +1,5 @@
 from errbot import BotPlugin, botcmd
+from io import BytesIO
 from json import dumps as json_dumps, load as json_load
 import logging
 from os import getcwd
@@ -6,9 +7,7 @@ from os.path import dirname, join, realpath
 from random import choice as random_choice, randint as random_randint
 from re import search as re_search
 from requests import get as requests_get, post as requests_post
-from tempfile import TemporaryFile
 from time import sleep
-from io import BytesIO
 
 from PIL import Image
 
@@ -26,7 +25,6 @@ class Tradingpost(BotPlugin):
             card = get_card(args)
         except CardNotFoundException as e:
             return e.msg
-
         body = '{} ({})'.format(card['set_name'], card['set'].upper())
         if card['layout'] == 'transform':
             for face in card['card_faces']:
@@ -93,7 +91,6 @@ class Tradingpost(BotPlugin):
             card = get_card(args)
         except CardNotFoundException as e:
             e.msg
-
         if 'usd' in card or 'eur' in card or 'tix' in card['prices']:
             txt = 'Prices for {} from {} ({}):\n'.format(card['name'], card['set_name'], card['set'].upper())
             txt += '${} — '.format(card['prices']['usd']) if card['prices']['usd'] else 'n/a — '
@@ -158,18 +155,13 @@ class Tradingpost(BotPlugin):
             image2 = download_card_image(card2)
         except CardNotFoundException as e:
             return e.msg
-
         sutcliffe_template = Image.open('plugins/tradingpost-errbot/assets/sutcliffe-canvas.png')
-
         card_positions = ((490, 25), (490, 435))
-
         sutcliffe_template.paste(image1, box=card_positions[0])
         sutcliffe_template.paste(image2, box=card_positions[1])
-
         sutcliffe_bytes = BytesIO()
         sutcliffe_template.save(sutcliffe_bytes, format='PNG')
         sutcliffe_bytes.seek(0)
-
         self.send_stream_request(msg.frm, sutcliffe_bytes)
 
 
