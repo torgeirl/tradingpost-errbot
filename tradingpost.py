@@ -121,7 +121,7 @@ class Tradingpost(BotPlugin):
 
         number = int(match.group('number') or 1)  # default to 1 die rolled
         sides = int(match.group('sides') or 6)  # default to 6 sides
-        logging.info('{}d{}'.format(number, sides))
+        logging.info('Rolling {}d{} for {}'.format(number, sides, msg.frm))
 
         if not 1 < sides <= 10**6:
             yield 'Please supply a valid number of sides.'
