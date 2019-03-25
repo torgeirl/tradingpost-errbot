@@ -168,6 +168,7 @@ class Tradingpost(BotPlugin):
 
         sutcliffe_bytes = BytesIO()
         sutcliffe_template.save(sutcliffe_bytes, format='PNG')
+        sutcliffe_bytes.seek(0)
 
         self.send_stream_request(msg.frm, sutcliffe_bytes)
 
