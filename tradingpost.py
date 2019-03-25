@@ -5,7 +5,7 @@ import logging
 from os import getcwd
 from os.path import dirname, join, realpath
 from random import choice as random_choice, randint as random_randint
-from re import search as re_search
+from re import search as re_search, match as re_match
 from requests import get as requests_get, post as requests_post
 from time import sleep
 
@@ -110,14 +110,28 @@ class Tradingpost(BotPlugin):
 
     @botcmd
     def roll(self, msg, args):
-        '''Rolls a die with N sides; defaults to D6. :game_die:'''
-        sides = '6' if args == '' else args
-        if sides.isdigit() and int(sides) > 1:
-            yield 'Rolled a {}-sided die, and the result is...'.format(sides)
-            sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
-            yield '... {}! :game_die:'.format(random_randint(1, int(sides)))
-        else:
-            yield 'Please supply a valid number sufficient for rolling (2 or more).'
+        '''Rolls one or more dice with N sides; defaults to 1D6. :game_die:'''
+        match = re_match(r'(?:(?P<number>\d+)d)?(?P<sides>\d+)?$', args)
+        if not match:
+            yield 'Please supply a valid number sufficient for rolling.'
+            return
+
+        number = int(match.group('number') or 1)  # default to 1 die rolled
+        sides = int(match.group('sides') or 6)  # default to 6 sides
+        logging.info('Rolling {}d{} for {}'.format(number, sides, msg.frm))
+
+        if not 1 < sides <= 10**6:
+            yield 'Please supply a valid number of sides.'
+            return
+        elif not 0 < number <= 100:
+            yield 'Please supply a valid number of dice.'
+            return
+
+        results = [str(random_randint(1, sides)) for _ in range(number)]
+        roll_msg = 'Rolled {} {}-sided dice, and the result is...'
+        yield roll_msg.format(number if number > 1 else 'a', sides)
+        sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
+        yield '... {}! :game_die:'.format(' '.join(results))
 
     @botcmd
     def rulings(self, msg, args):
