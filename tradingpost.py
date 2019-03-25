@@ -8,6 +8,7 @@ from random import choice as random_choice, randint as random_randint
 from re import search as re_search, match as re_match
 from requests import get as requests_get, post as requests_post
 from time import sleep
+from datetime import datetime
 
 from PIL import Image
 
@@ -169,14 +170,19 @@ class Tradingpost(BotPlugin):
             image2 = download_card_image(card2)
         except CardNotFoundException as e:
             return e.msg
+
         sutcliffe_template = Image.open('plugins/tradingpost-errbot/assets/sutcliffe-canvas.png')
         card_positions = ((490, 25), (490, 435))
+
         sutcliffe_template.paste(image1, box=card_positions[0])
         sutcliffe_template.paste(image2, box=card_positions[1])
+
         sutcliffe_bytes = BytesIO()
         sutcliffe_template.save(sutcliffe_bytes, format='PNG')
         sutcliffe_bytes.seek(0)
-        self.send_stream_request(msg.frm, sutcliffe_bytes)
+
+        name = 'sutcliffe-{}.png'.format(datetime.now().strftime('%Y%m%d-%H%M'))
+        self.send_stream_request(msg.frm, sutcliffe_bytes, name=name)
 
 
 class CardNotFoundException(Exception):
