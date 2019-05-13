@@ -10,6 +10,9 @@ from requests import get as requests_get, post as requests_post
 from time import sleep
 from datetime import datetime
 
+
+from pwp import get_pwp, UnexpectedStatusCode
+
 from PIL import Image
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
@@ -106,7 +109,13 @@ class Tradingpost(BotPlugin):
     def pwp(self, msg, args):
         '''Fetches the PWP score and bye eligibility for a DCI number :trophy:'''
         if args.isdigit() and 0 < len(args) <= 18:
-            return write_pwp(args)
+            try:
+                return get_pwp(args)
+            except UnexpectedStatusCode as e:
+                return 'Unexpected status code ({}) while fetching PlaneswalkerPoints'.format(e.status_code)
+            except ValueError:
+                return 'An error occured fetching PlaneswalkerPoints.'
+
         return '\'{}\' doesn\'t look like a DCI number. Try again, but with an actual number.'.format(args)
 
     @botcmd
@@ -119,7 +128,7 @@ class Tradingpost(BotPlugin):
 
         number = int(match.group('number') or 1)  # default to 1 die rolled
         sides = int(match.group('sides') or 6)  # default to 6 sides
-        logging.info('Rolling {}d{} for {}'.format(number, sides, msg.frm))
+        logger.info('Rolling {}d{} for {}'.format(number, sides, msg.frm))
 
         if not 1 < sides <= 10**6:
             yield 'Please supply a valid number of sides.'
@@ -231,13 +240,13 @@ def get_card(args, listing=False):
     query_url = 'https://api.scryfall.com/cards/{}'.format(mode).format(name)
     if preference and not listing:
         query_url += '&set={}'.format(preference)
-    logging.info(u'Connecting to https://api.scryfall.com')
+    logger.info(u'Connecting to https://api.scryfall.com')
     response = requests_get(query_url)
     if response.status_code is 200:
         try:
             return response.json()
         except ValueError:
-            logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
+            logger.error(u'No JSON object could be decoded from API response: {}'.format(response))
             raise CardNotFoundException("Card '{}' not found.".format(name))
     else:
         raise CardNotFoundException("Card '{}' not found.".format(name))
@@ -245,78 +254,17 @@ def get_card(args, listing=False):
 
 def get_card_rulings(scryfall_id):
     query_url = 'https://api.scryfall.com/cards/{}/rulings'.format(scryfall_id)
-    logging.info(u'Connecting to https://api.scryfall.com')
+    logger.info(u'Connecting to https://api.scryfall.com')
     response = requests_get(query_url)
     if response.status_code is 200:
         try:
             return response.json()
         except ValueError:
-            logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
+            logger.error(u'No JSON object could be decoded from API response: {}'.format(response))
             return None
     else:
         return None
 
-
-def get_seasons(dci_number):
-    '''Returns to current and last season for that DCI number'''
-    url = 'http://www.wizards.com/Magic/PlaneswalkerPoints/JavaScript/GetPointsHistoryModal'
-    headers = {
-        'Pragma': 'no-cache',
-        'Origin': 'http://www.wizards.com',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'en-US,en;q=0.8,de;q=0.6,sv;q=0.4',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': '*/*',
-        'Cache-Control': 'no-cache',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Cookie': 'f5_cspm=1234; BIGipServerWWWPWPPOOL01=353569034.20480.0000; __utmt=1; BIGipServerWWWPool1=3792701706.20480.0000; PlaneswalkerPointsSettings=0=0&lastviewed=9212399887; __utma=75931667.1475261136.1456488297.1456488297.1456488297.1; __utmb=75931667.5.10.1456488297; __utmc=75931667; __utmz=75931667.1456488297.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)',
-        'Connection': 'keep-alive',
-        'Referer': 'http://www.wizards.com/Magic/PlaneswalkerPoints/{}'.format(dci_number)
-    }
-    data = {'Parameters': {'DCINumber': dci_number, 'SelectedType': 'Yearly'}}
-    logging.info(u'Connecting to http://www.wizards.com')
-    response = requests_post(url, headers=headers, data=json_dumps(data))
-    if response.status_code is 200:
-        seasons = []
-        try:
-            response_data = response.json()
-            markup = response_data['ModalContent']
-            search_position = markup.find('SeasonRange')
-            while search_position != -1:
-                pointsvalue = 'PointsValue\">'
-                search_position = markup.find(pointsvalue, search_position)
-                search_position += len(pointsvalue)
-                end_position = markup.find('</div>', search_position)
-                if end_position != -1:
-                    value = markup[search_position:end_position]
-                    seasons.append(int(value))
-                search_position = markup.find('SeasonRange', search_position)
-        except ValueError:
-            logging.error(u'No JSON object could be decoded from API response: {}'.format(response))
-            return 'Garbled response from backend. Please try again later.'
-        try:
-            return {'currentSeason': seasons[0], 'lastSeason': seasons[1]}
-        except IndexError:
-            return 'DCI# {} not found.'.format(dci_number)
-    else:
-        logging.error(u'No response from API (HTTP code {})'.format(response.status_code))
-        return 'No response from backend. Please try again later.'
-
-
-def write_pwp(dci_number):
-    response = get_seasons(dci_number)
-    if isinstance(response, dict):
-        txt = 'DCI# {} has {} points in the current season, and {} points last season.\nCurrently '.format(dci_number, response['currentSeason'], response['lastSeason'])
-        if response['currentSeason'] >= 2250 or response['lastSeason'] >= 2250:
-            txt += 'eligible for 2 GP byes.'
-        elif response['currentSeason'] >= 1300 or response['lastSeason'] >= 1300:
-            txt += 'eligible for 1 GP bye.'
-        else:
-            txt += 'not eligible for GP byes.'
-        return txt
-    else:
-        return response
 
 def download_card_image(cardname):
     card = get_card(cardname)
