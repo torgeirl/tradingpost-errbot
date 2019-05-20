@@ -107,7 +107,7 @@ class Tradingpost(BotPlugin):
 
     @botcmd
     def pwp(self, msg, args):
-        '''Fetches the PWP score and bye eligibility for a DCI number :trophy:'''
+        '''Fetches available PlaneswalkerPoints for a DCI number :trophy:'''
         if args.isdigit() and 0 < len(args) <= 18:
             try:
                 return get_pwp(args)
