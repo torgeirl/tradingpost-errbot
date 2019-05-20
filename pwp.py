@@ -35,14 +35,14 @@ def _parse_pwp(json_dict):
 
 
 def _get_pwp(dci_number):
-    logging.info(u'Connecting to http://www.wizards.com/')
+    logger.info(u'Connecting to http://www.wizards.com/')
     url = 'https://www.wizards.com/Magic/PlaneswalkerPoints/JavaScript/GetPointsSummary/{}'.format(dci_number)
     response = requests.post(url, verify=False)
 
     if response.status_code is 200:
         return _parse_pwp(response.json())
     else:
-        logging.error('Unexpected status code ({}) fetching {}'.format(response.status_code, url))
+        logger.error('Unexpected status code ({}) fetching {}'.format(response.status_code, url))
         raise UnexpectedStatusCode(response.status_code)
 
 
