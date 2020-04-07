@@ -48,6 +48,16 @@ class Tradingpost(BotPlugin):
         return random_choice(['HEADS!', 'TAILS!'])
 
     @botcmd
+    def flavor(self, msg, args):
+        '''Full-blown vorthos or a cheesy one liner? :scroll: '''
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            return e.msg
+        # TODO
+        return 'Not finished'
+
+    @botcmd
     def joke(self, msg, args):
         '''Tells you a random joke. Warning: the jokes are really, really bad. :laughing:'''
         with open(join(__location__, 'assets/jokes.json'), 'r') as infile:
