@@ -5,6 +5,9 @@ metadata:
   labels:
     app: tradingpost-errbot
 spec:
+  selector:
+    matchLabels:
+      app: tradingpost-errbot
   template:
     metadata:
       labels:
@@ -12,4 +15,4 @@ spec:
     spec:
       containers:
       - name: tradingpost-errbot
-        image: docker.pkg.github.com/torgeirl/tradingpost-errbot/image:latest
+        image: torgeirl/tradingpost-errbot:latest
