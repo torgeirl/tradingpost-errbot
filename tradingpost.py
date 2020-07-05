@@ -10,9 +10,6 @@ from requests import get as requests_get, post as requests_post
 from time import sleep
 from datetime import datetime
 
-
-from pwp import get_pwp, UnexpectedStatusCode
-
 from PIL import Image
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
@@ -117,16 +114,8 @@ class Tradingpost(BotPlugin):
 
     @botcmd
     def pwp(self, msg, args):
-        '''Fetches available PlaneswalkerPoints for a DCI number :trophy:'''
-        if args.isdigit() and 0 < len(args) <= 18:
-            try:
-                return get_pwp(args)
-            except UnexpectedStatusCode as e:
-                return 'Unexpected status code ({}) while fetching PlaneswalkerPoints'.format(e.status_code)
-            except ValueError:
-                return 'An error occured fetching PlaneswalkerPoints.'
-
-        return '\'{}\' doesn\'t look like a DCI number. Try again, but with an actual number.'.format(args)
+        '''Fetches available PlaneswalkerPoints for a DCI number :trophy: (deprecated)'''
+        return 'Deprecated: the PWP website was closed by WotC on May 27, 2020. :cry:'
 
     @botcmd
     def roll(self, msg, args):
