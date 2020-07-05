@@ -19,10 +19,8 @@ spec:
         volumeMounts:
         - name: tradingpost-config
           mountPath: "/etc/tradingpost-errbot"
+          readOnly: true
       volumes:
-      - name: tradingpost-errbot
-        secrets:
+      - name: tradingpost-config
+        secret:
           secretName: tradingpost-config
-          items:
-          - key: 
-            path: config.py
