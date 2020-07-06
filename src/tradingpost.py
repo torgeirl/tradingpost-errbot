@@ -47,10 +47,10 @@ class Tradingpost(BotPlugin):
     @botcmd
     def flavor(self, msg, args):
         '''Full-blown vorthos or a cheesy one liner? :scroll: '''
-        try:
-            card = get_card(args)
-        except CardNotFoundException as e:
-            return e.msg
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            return e.msg
         # TODO
         return 'Not finished'
 
