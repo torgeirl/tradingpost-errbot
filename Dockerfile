@@ -19,5 +19,5 @@ COPY src /app/plugins/tradingpost-errbot
 
 WORKDIR /app
 
-RUN ["errbot", "-i"]
+RUN ["errbot", "-c", "config.py", "-i"]
 CMD ["errbot", "-c", "config.py"]

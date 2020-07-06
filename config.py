@@ -22,5 +22,5 @@ SUPPRESS_CMD_NOT_FOUND = True
 BOT_DATA_DIR = map_path('data')
 BOT_EXTRA_PLUGIN_DIR = map_path('plugins')
 
-BOT_LOG_FILE = map_path('errbot.log')
-BOT_LOG_LEVEL = logging.INFO
+BOT_LOG_FILE = None
+BOT_LOG_LEVEL = logging.DEBUG
