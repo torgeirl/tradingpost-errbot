@@ -1,4 +1,4 @@
-FROM python:3.7-alpine as base
+FROM python:3.7-slim as base
 
 FROM base as builder
 
@@ -7,7 +7,8 @@ WORKDIR /install
 
 COPY requirements.txt /requirements.txt
 
-RUN apk add --no-cache zlib-dev jpeg-dev openssl-dev libffi-dev musl-dev make gcc
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends libjpeg8-dev zlib1g-dev
 RUN pip install --prefix=/install --no-warn-script-location -r /requirements.txt
 
 FROM base
