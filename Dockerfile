@@ -13,9 +13,10 @@ RUN pip install --prefix=/install --no-warn-script-location errbot==6.1.4 slackc
 FROM base
 
 COPY --from=builder /install /usr/local
+COPY config.py /app/config.py
 COPY src /app/plugins/tradingpost-errbot
 
 WORKDIR /app
 
-RUN ["errbot", "-c /etc/tradingpost-errbot/config.py", "-i"]
-CMD ["errbot", "-c /etc/tradingpost-errbot/config.py"]
+RUN ["errbot", "-i"]
+CMD ["errbot"]

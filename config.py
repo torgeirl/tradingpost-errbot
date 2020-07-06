@@ -1,6 +1,7 @@
 # http://errbot.io/en/latest/user_guide/configuration/slack.html
 
 import logging
+from os import getenv
 from os.path import dirname, join
 
 def map_path(target_name):
@@ -10,11 +11,11 @@ def map_path(target_name):
 BACKEND = 'Slack'
 
 BOT_IDENTITY = {
-    'token': 'xoxb-4426949411-aEM7...',
+    'token': getenv('ERRBOT-TOKEN'),
 }
 
-BOT_ADMINS = ('@gbin', '@zoni')
-BOT_ALT_PREFIXES = ('@self-assembler',)
+BOT_ADMINS = (getenv('ERRBOT-ADMINS'))
+BOT_ALT_PREFIXES = ()
 CHATROOM_PRESENCE = () # this should be empty
 SUPPRESS_CMD_NOT_FOUND = True
 

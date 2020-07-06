@@ -6,13 +6,11 @@ tradingpost-errbot
 ## Overview
 A simple Magic: the Gathering bot, implemented as an Errbot plugin.
 
-## Deployment 
-Create a config file for your installation:
-  - `$ cp config.py-example config.py`
-  - `$ vim config.py # update BOT_IDENTITY and BOT_ADMINS`
+## Deployment (Kubernetes)
+Save your bot's Slack token and the username(s) of the bot's admin(s) as secrets:
+  - `$ kubectl create secret generic tradingpost-config --from-literal='errbot-token=xoxb-4426949411-aEM7...' --from-literal='errbot-admins=@gbin'`
 
-Store `config.py` as a secret in k8s before creating the k8s deployment:
-  - `$ kubectl create secret generic tradingpost-config --from-file=./config.py`
+Deploy the bot:
   - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
 
 ## Credits

@@ -16,11 +16,14 @@ spec:
       containers:
       - name: tradingpost-errbot
         image: torgeirl/tradingpost-errbot:latest
-        volumeMounts:
-        - name: tradingpost-config
-          mountPath: "/etc/tradingpost-errbot"
-          readOnly: true
-      volumes:
-      - name: tradingpost-config
-        secret:
-          secretName: tradingpost-config
+        env:
+          - name: ERRBOT-TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: tradingpost-config 
+                key: errbot-token
+          - name: ERRBOT-ADMINS
+            valueFrom:
+              secretKeyRef:
+                name: tradingpost-config
+                key: errbot-admins
