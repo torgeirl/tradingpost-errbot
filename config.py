@@ -23,4 +23,4 @@ BOT_DATA_DIR = map_path('data')
 BOT_EXTRA_PLUGIN_DIR = map_path('plugins')
 
 BOT_LOG_FILE = None
-BOT_LOG_LEVEL = logging.DEBUG
+BOT_LOG_LEVEL = logging.INFO
