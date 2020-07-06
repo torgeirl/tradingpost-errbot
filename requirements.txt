@@ -1,0 +1,4 @@
+errbot==6.1.4
+Pillow
+requests
+slackclient

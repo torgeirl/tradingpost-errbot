@@ -5,10 +5,10 @@ FROM base as builder
 RUN mkdir /install
 WORKDIR /install
 
-COPY src/requirements.txt /requirements.txt
+COPY requirements.txt /requirements.txt
 
 RUN apk add --no-cache zlib-dev jpeg-dev openssl-dev libffi-dev musl-dev make gcc
-RUN pip install --prefix=/install --no-warn-script-location errbot==6.1.4 slackclient -r /requirements.txt
+RUN pip install --prefix=/install --no-warn-script-location -r /requirements.txt
 
 FROM base
 
