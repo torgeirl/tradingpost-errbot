@@ -47,7 +47,7 @@ class Tradingpost(BotPlugin):
     @botcmd
     def flavor(self, msg, args):
         '''Full-blown vorthos or a cheesy one liner? :scroll: '''
-        return 'Not finished' # TODO
+        return 'Not finished' # TODO
 
     @botcmd
     def joke(self, msg, args):
