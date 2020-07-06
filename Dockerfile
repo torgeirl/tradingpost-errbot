@@ -14,10 +14,10 @@ RUN pip install --prefix=/install --no-warn-script-location -r /requirements.txt
 FROM base
 
 COPY --from=builder /install /usr/local
-COPY config.py /app/config.py
+COPY errbot-config.py /app/errbot-config.py
 COPY src /app/plugins/tradingpost-errbot
 
 WORKDIR /app
 
-RUN ["errbot", "--config" "config.py", "--init"]
-CMD ["errbot", "--config" "config.py"]
+RUN ["errbot", "--config", "errbot-config.py", "--init"]
+CMD ["errbot", "--config", "errbot-config.py"]
