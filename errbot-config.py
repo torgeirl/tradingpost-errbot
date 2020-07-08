@@ -15,7 +15,7 @@ BOT_IDENTITY = {
 }
 
 BOT_ADMINS = (getenv('ERRBOT-ADMINS'))
-BOT_ALT_PREFIXES = ('@self-assembler',)
+BOT_ALT_PREFIXES = ('@tradingpost',)
 CHATROOM_PRESENCE = () # this should be empty
 SUPPRESS_CMD_NOT_FOUND = True
 
