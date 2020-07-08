@@ -1,4 +1,4 @@
-from errbot import BotPlugin, botcmd
+from datetime import datetime
 from io import BytesIO
 from json import dumps as json_dumps, load as json_load
 import logging
@@ -6,18 +6,18 @@ from os import getcwd
 from os.path import dirname, join, realpath
 from random import choice as random_choice, randint as random_randint
 from re import search as re_search, match as re_match
-from requests import get as requests_get, post as requests_post
 from time import sleep
-from datetime import datetime
 
+from errbot import BotPlugin, botcmd
 from PIL import Image
+from requests import get as requests_get, post as requests_post
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
 logger = logging.getLogger(__name__)
 
 
 class Tradingpost(BotPlugin):
-    '''Plugin that fetches MtG card pictures, oracle texts, prices and player's planeswalker points on request.'''
+    '''Plugin that fetches MtG card pictures, oracle texts, prices and flavor texts on request.'''
 
     @botcmd
     def card(self, msg, args):

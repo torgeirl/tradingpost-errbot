@@ -6,4 +6,4 @@ Module = tradingpost
 Version = 3
 
 [Documentation]
-Description = Plugin that fetches Magic: the Gathering card pictures, oracle texts, prices and player's planeswalker points on request.
+Description = Plugin that fetches Magic: the Gathering card pictures, oracle texts, prices and flavor texts on request.
