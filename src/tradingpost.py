@@ -47,7 +47,17 @@ class Tradingpost(BotPlugin):
     @botcmd
     def flavor(self, msg, args):
         '''Full-blown vorthos or a cheesy one liner? :scroll: '''
-        return 'Not finished' # TODO
+        try:
+            card = get_card(args)
+        except CardNotFoundException as e:
+            return e.msg
+        if 'card_faces' in card:
+            return 'Sorry, suppport for DFCs hasn\'t been added yet. :construction:' # TODO
+        else:
+            if 'flavor_text' in card:
+                return card['flavor_text']
+            else:
+                return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'])
 
     @botcmd
     def joke(self, msg, args):
