@@ -1,4 +1,4 @@
-git+https://github.com/errbotio/errbot.git@refs/pull/1443/head
+git+https://github.com/errbotio/errbot.git@master#egg=errbot
 Pillow
 requests
 slackclient
