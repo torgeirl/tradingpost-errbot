@@ -8,7 +8,7 @@ def map_path(target_name):
     '''Enables path names to be dynamically ascertained at runtime.'''
     return join(dirname(__file__), target_name).replace('\\', '/')
 
-BACKEND = 'SlackRTM'
+BACKEND = 'Slack'
 
 BOT_IDENTITY = {
     'token': getenv('ERRBOT-TOKEN'),
