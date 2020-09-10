@@ -1,11 +1,11 @@
 from datetime import datetime
 from io import BytesIO
-from json import dumps as json_dumps, load as json_load
+from json import load as json_load
 import logging
 from os import getcwd
 from os.path import dirname, join, realpath
-from random import choice as random_choice, randint as random_randint
-from re import search as re_search, match as re_match
+from random import choice as random_choice
+from re import search as re_search
 from time import sleep
 
 from errbot import BotPlugin, botcmd
@@ -38,11 +38,6 @@ class Tradingpost(BotPlugin):
                            body=body,
                            image=card['image_uris']['normal'],
                            in_reply_to=msg)
-
-    @botcmd
-    def coinflip(self, msg, args):
-        '''Need to toss a coin in these cash-free times? Look no further.'''
-        return random_choice(['HEADS!', 'TAILS!'])
 
     @botcmd
     def flavor(self, msg, args):
@@ -121,31 +116,6 @@ class Tradingpost(BotPlugin):
     def pwp(self, msg, args):
         '''Fetches available PlaneswalkerPoints for a DCI number :trophy: (deprecated)'''
         return 'Deprecated: the PWP website was closed by WotC on May 27, 2020. :cry:'
-
-    @botcmd
-    def roll(self, msg, args):
-        '''Rolls one or more dice with N sides; defaults to 1D6. :game_die:'''
-        match = re_match(r'(?:(?P<number>\d+)d)?(?P<sides>\d+)?$', args)
-        if not match:
-            yield 'Please supply a valid number sufficient for rolling.'
-            return
-
-        number = int(match.group('number') or 1)  # default to 1 die rolled
-        sides = int(match.group('sides') or 6)  # default to 6 sides
-        logger.info('Rolling {}d{} for {}'.format(number, sides, msg.frm))
-
-        if not 1 < sides <= 10**6:
-            yield 'Please supply a valid number of sides.'
-            return
-        elif not 0 < number <= 100:
-            yield 'Please supply a valid number of dice.'
-            return
-
-        results = [str(random_randint(1, sides)) for _ in range(number)]
-        roll_msg = 'Rolled {} {}-sided dice, and the result is...'
-        yield roll_msg.format(number if number > 1 else 'a', sides)
-        sleep(1)  # TODO is there a 'send_user_typing_pause()' equivalent for errbot?
-        yield '... {}! :game_die:'.format(' '.join(results))
 
     @botcmd
     def rulings(self, msg, args):
