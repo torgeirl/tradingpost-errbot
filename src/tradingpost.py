@@ -52,7 +52,7 @@ class Tradingpost(BotPlugin):
             if 'flavor_text' in card:
                 return card['flavor_text']
             else:
-                return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'])
+                return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'].upper())
 
     @botcmd
     def joke(self, msg, args):
@@ -216,7 +216,7 @@ def get_card(args, listing=False):
         query_url += '&set={}'.format(preference)
     logger.info(u'Connecting to https://api.scryfall.com')
     response = requests_get(query_url)
-    if response.status_code is 200:
+    if response.status_code == 200:
         try:
             return response.json()
         except ValueError:
@@ -230,7 +230,7 @@ def get_card_rulings(scryfall_id):
     query_url = 'https://api.scryfall.com/cards/{}/rulings'.format(scryfall_id)
     logger.info(u'Connecting to https://api.scryfall.com')
     response = requests_get(query_url)
-    if response.status_code is 200:
+    if response.status_code == 200:
         try:
             return response.json()
         except ValueError:
