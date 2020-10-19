@@ -46,13 +46,16 @@ class Tradingpost(BotPlugin):
             card = get_card(args)
         except CardNotFoundException as e:
             return e.msg
+        flavor_text = ''
         if 'card_faces' in card:
-            return 'Sorry, suppport for DFCs hasn\'t been added yet. :construction:' # TODO
+            flavor_text = '\n--\n'.join('_{}_'.format(face['flavor_text']) for face in card['card_faces'])
         else:
             if 'flavor_text' in card:
-                return card['flavor_text']
-            else:
-                return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'].upper())
+                flavor_text = '_{}_'.format(card['flavor_text'])
+        if flavor_text:
+            return flavor_text
+        else:
+            return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'].upper())
 
     @botcmd
     def joke(self, msg, args):
@@ -89,7 +92,6 @@ class Tradingpost(BotPlugin):
             card = get_card(args)
         except CardNotFoundException as e:
             return e.msg
-
         if 'card_faces' in card:
             return '\n--\n'.join(card_text(face) for face in card['card_faces'])
         else:
