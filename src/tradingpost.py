@@ -49,13 +49,13 @@ class Tradingpost(BotPlugin):
         flavor_texts = []
         if 'card_faces' in card:
             for face in card['card_faces']:
-                if face['flavor_text']:
+                if 'flavor_text' in face:
                     flavor_texts.append('_{}_'.format(face['flavor_text']))
         else:
             if 'flavor_text' in card:
                 flavor_texts.append('_{}_'.format(card['flavor_text']))
         if flavor_texts:
-            return '{}\n({}({}))'.format('\n--\n'.join(flavor_texts), card['name'], card['set'].upper())
+            return '{}{}\n({} ({}))'.format('', '\n--\n'.join(flavor_texts), card['name'], card['set'].upper())
         else:
             return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'].upper())
 
