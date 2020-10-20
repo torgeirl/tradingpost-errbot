@@ -46,14 +46,16 @@ class Tradingpost(BotPlugin):
             card = get_card(args)
         except CardNotFoundException as e:
             return e.msg
-        flavor_text = ''
+        flavor_texts = []
         if 'card_faces' in card:
-            flavor_text = '\n--\n'.join('_{}_'.format(face['flavor_text']) for face in card['card_faces'])
+            for face in card['card_faces']:
+                if face['flavor_text']:
+                    flavor_texts.append('_{}_'.format(face['flavor_text']))
         else:
             if 'flavor_text' in card:
-                flavor_text = '_{}_'.format(card['flavor_text'])
-        if flavor_text:
-            return flavor_text
+                flavor_texts.append('_{}_'.format(card['flavor_text']))
+        if flavor_texts:
+            return '{}\n({}({}))'.format('\n--\n'.join(flavor_texts), card['name'], card['set'].upper())
         else:
             return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'].upper())
 
