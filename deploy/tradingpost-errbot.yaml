@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: tradingpost-errbot
-        image: ghcr.io/torgeirl/tradingpost-errbot/image:latest
+        image: ghcr.io/torgeirl/tradingpost-errbot:latest
         env:
           - name: ERRBOT-TOKEN
             valueFrom:
