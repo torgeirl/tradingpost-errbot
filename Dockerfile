@@ -18,6 +18,9 @@ COPY --from=builder /install /usr/local
 COPY errbot-config.py /app/errbot-config.py
 COPY src /app/plugins/tradingpost-errbot
 
+WORKDIR /app/plugins
+RUN git clone https://github.com/torgeirl/random-errbot.git
+
 WORKDIR /app
 
 RUN ["errbot", "--init"]
