@@ -95,7 +95,7 @@ class Tradingpost(BotPlugin):
         except CardNotFoundException as e:
             return e.msg
         if 'card_faces' in card:
-            return '\n--\n'.join(card_text(face) for face in card['card_faces'])
+            return '\n—\n'.join(card_text(face) for face in card['card_faces'])
         else:
             return card_text(card)
 
