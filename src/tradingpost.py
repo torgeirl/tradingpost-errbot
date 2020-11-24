@@ -55,7 +55,7 @@ class Tradingpost(BotPlugin):
             if 'flavor_text' in card:
                 flavor_texts.append(card['flavor_text'])
         if flavor_texts:
-            return '{}\n({} ({}))'.format('\n--\n'.join(flavor_texts), card['name'], card['set'].upper())
+            return '{}\n({} ({}))'.format('\n—\n'.join(flavor_texts), card['name'], card['set'].upper())
         else:
             return 'It seems {} ({}) doesn\'t have any flavor text.'.format(card['name'], card['set'].upper())
 
