@@ -8,7 +8,7 @@ WORKDIR /install
 COPY requirements.txt /requirements.txt
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends libjpeg62-turbo-dev zlib1g-dev
+RUN apt-get install -y --no-install-recommends libjpeg62-turbo-dev zlib1g-dev git
 RUN pip install --prefix=/install --no-warn-script-location -r /requirements.txt
 
 RUN mkdir /download
