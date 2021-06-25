@@ -16,7 +16,7 @@ Deploy the bot:
 You can see the bot's pod by listing pods:
   - `$ kubectl get pods`
 
-The Errbot logs are available from the Kubernetes:
+The Errbot logs are available from Kubernetes:
   - `$ kubectl logs tradingpost-deployment-<pod-identifier>`
 
 Recreate the deployment to update the bot to the latest version:
