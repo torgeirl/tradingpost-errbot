@@ -13,6 +13,16 @@ Save your bot's Slack token and the username(s) of the bot's admin(s) as secrets
 Deploy the bot:
   - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
 
+You can see the bot's pod by listing pods:
+  - `$ kubectl get pods`
+
+The Errbot logs are available from the Kubernetes:
+  - `$ kubectl logs tradingpost-deployment-<pod-identifier>`
+
+Recreate the deployment to update the bot to the latest version:
+  - `$ kubectl delete -f deploy/tradingpost-errbot.yaml`
+  - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
+
 ## History and credits
   - Tradingpost was first created in 2016 as [tradingpost-beepboop](https://github.com/torgeirl/tradingpost-beepboop), a [BeepBoop](https://beepboophq.com/docs/article/overview)-hostable Slack bot. The inspiration to make it came from seeing Filip Söderholm's [cardfetcher bot](https://github.com/fiso/cardfetcher) in action, and part of his code was re-used while making Tradingpost.
 
