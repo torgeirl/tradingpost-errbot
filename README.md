@@ -4,7 +4,7 @@ tradingpost-errbot
 ![Docker](https://github.com/torgeirl/tradingpost-errbot/workflows/Docker/badge.svg)
 
 ## Overview
-A simple Magic: the Gathering bot, implemented as an Errbot plugin and deployed with Kubernetes.
+A simple Magic: the Gathering bot for Slack, implemented as an Errbot plugin and deployed with Kubernetes.
 
 ## Deployment (kubectl)
 Save your bot's Slack token and the username(s) of the bot's admin(s) as secrets:
@@ -24,7 +24,7 @@ Recreate the deployment to update the bot to the latest version:
   - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
 
 ## History and credits
-  - Tradingpost was first created in 2016 as [tradingpost-beepboop](https://github.com/torgeirl/tradingpost-beepboop), a [BeepBoop](https://beepboophq.com/docs/article/overview)-hostable Slack bot. The inspiration to make it came from seeing Filip Söderholm's [cardfetcher bot](https://github.com/fiso/cardfetcher) in action, and part of his code was re-used while making Tradingpost.
+  - Tradingpost was first created in 2016 as [tradingpost-beepboop](https://github.com/torgeirl/tradingpost-beepboop), a [Beep Boop](https://github.com/BeepBoopHQ/starter-python-bot)-hostable Slack bot. The inspiration to make it came from seeing Filip Söderholm's [cardfetcher bot](https://github.com/fiso/cardfetcher) in action, and part of his code was re-used while making Tradingpost.
 
   - Tradingpost was ported from BeepBoop to [Errbot](https://github.com/errbotio/errbot) in November 2017. [Scryfall](https://scryfall.com/docs/api) was adapted as the backend around the same time.
 
