@@ -1,6 +1,7 @@
 tradingpost-errbot
 =============
 
+![Errbot plugin](https://github.com/torgeirl/tradingpost-errbot/actions/workflows/python-tests.yml/badge.svg)
 ![Docker](https://github.com/torgeirl/tradingpost-errbot/workflows/Docker/badge.svg)
 
 ## Overview
