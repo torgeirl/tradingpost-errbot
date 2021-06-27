@@ -1,9 +1,9 @@
-import random
+import tradingpost
 from errbot.backends.test import testbot
 from errbot import plugin_manager
 
 
-class TestRandom(object):
+class TestTradingpost(object):
     extra_plugin_dir = '.'
 
     def test_flavor(self, testbot):
