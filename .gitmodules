@@ -1,0 +1,3 @@
+[submodule "plugins/random-errbot"]
+	path = plugins/random-errbot
+	url = git@github.com:torgeirl/random-errbot.git
