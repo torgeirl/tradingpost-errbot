@@ -283,7 +283,7 @@ def get_sets_and_bans():
             logger.error(u'No JSON object could be decoded from API response: {}'.format(response))
             raise ValueError('Reponse from https://whatsinstandard.com could not be decoded.')
     else:
-        logger.error(u'Unexpected status code ({}) fetching {}'.format(response.status_code, url))
+        logger.error(u'Unexpected status code ({}) fetching {}'.format(response.status_code, query_url))
         raise UnexpectedStatusCode(response.status_code)
 
 
