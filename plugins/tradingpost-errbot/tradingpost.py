@@ -144,6 +144,26 @@ class Tradingpost(BotPlugin):
             return 'Couldn\'t find any rulings for {}.'.format(card['name'])
 
     @botcmd
+    def standard(self, msg, args):
+        '''Gets the current Standard format from What's in Standard.'''
+        sets_and_bans = get_sets_and_bans()
+        rfc3339 = '%Y-%m-%dT%H:%M:%S.%f'
+        txt = ''
+        legal_sets = [] # TODO filter sets_and_bans['sets'] for sets currently legal, either by exact date or quarter
+        #for set in sets_and_bans['sets']:
+        #    if 'exact' in set['enterDate'] and set['enterDate']['exact'] and 'exact' in set['exitDate'] and set['exitDate']['exact']:
+        #        if datetime.strptime(set['enterDate']['exact'], rfc3339) <= datetime.now() <= datetime.strptime(set['exitDate']['exact'], rfc3339):
+        #            legal_sets.append(set)
+        txt += 'Standard legal sets:\n•T.B.D. (not yet implemented :construction:)\n'
+        banned_cards = [card['cardName'] for card in sets_and_bans['bans']]
+        if banned_cards:
+            txt += '\nCards banned in Standard ({}):'.format(len(banned_cards))
+            for card in banned_cards:
+                txt += '\n•{}'.format(card)
+        return txt
+
+
+    @botcmd
     def sutcliffe(self, msg, args):
         '''Sutcliffe meme generator. :hand: / :point_right:'''
         syntax = '!sutcliffe cardname A / cardname B'
@@ -175,6 +195,11 @@ class Tradingpost(BotPlugin):
 class CardNotFoundException(Exception):
     def __init__(self, msg):
         self.msg = msg
+
+
+class UnexpectedStatusCode(Exception):
+    def __init__(self, status_code):
+        self.status_code = status_code
 
 
 def card_text(card):
@@ -242,6 +267,24 @@ def get_card_rulings(scryfall_id):
             return None
     else:
         return None
+
+
+def get_sets_and_bans():
+    query_url = 'https://whatsinstandard.com/api/v6/standard.json'
+    logger.info(u'Connecting to https://whatsinstandard.com')
+    response = requests_get(query_url)
+    if response.status_code == 200:
+        try:
+            dataset = response.json()
+            if dataset['deprecated']:
+                logger.warning(u'{} is marked as deprecated.'.format(query_url))
+            return dataset
+        except ValueError:
+            logger.error(u'No JSON object could be decoded from API response: {}'.format(response))
+            raise ValueError('Reponse from https://whatsinstandard.com could not be decoded.')
+    else:
+        logger.error(u'Unexpected status code ({}) fetching {}'.format(response.status_code, url))
+        raise UnexpectedStatusCode(response.status_code)
 
 
 def download_card_image(cardname):
