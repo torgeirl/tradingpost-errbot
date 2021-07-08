@@ -154,11 +154,10 @@ class Tradingpost(BotPlugin):
         legal_sets = [] 
 
         # Extract only released sets
-        released_sets = []
-            for set in sets_and_bans['sets']:
-                enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
-                if enter_date < today:
-                    released_sets.append(set)
+        for set in sets_and_bans['sets']:
+            enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
+            if enter_date < today:
+                released_sets.append(set)
 
         # Remove sets that have rotated out
         for set in released_sets:
