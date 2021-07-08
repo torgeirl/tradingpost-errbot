@@ -188,8 +188,8 @@ class Tradingpost(BotPlugin):
                 enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
                 if enter_date >= today:
                     upcoming_sets.append((set['name'], (enter_date - today).days))
-                for name, days in sorted(upcoming_sets, key=lambda e: e[1]):
-                    txt += f"\n • {name} (Releases in {days} days)"
+            for name, days in sorted(upcoming_sets, key=lambda e: e[1]):
+                txt += f"\n • {name} (Releases in {days} days)"
 
             rotating_sets = []
             for set in legal_sets:
