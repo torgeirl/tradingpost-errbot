@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from io import BytesIO
 from json import load as json_load
 import logging
@@ -149,17 +149,38 @@ class Tradingpost(BotPlugin):
         sets_and_bans = get_sets_and_bans()
         rfc3339 = '%Y-%m-%dT%H:%M:%S.%f'
         txt = ''
-        legal_sets = [] # TODO filter sets_and_bans['sets'] for sets currently legal, either by exact date or quarter
-        #for set in sets_and_bans['sets']:
-        #    if 'exact' in set['enterDate'] and set['enterDate']['exact'] and 'exact' in set['exitDate'] and set['exitDate']['exact']:
-        #        if datetime.strptime(set['enterDate']['exact'], rfc3339) <= datetime.now() <= datetime.strptime(set['exitDate']['exact'], rfc3339):
-        #            legal_sets.append(set)
-        txt += 'Standard legal sets:\n•T.B.D. (not yet implemented :construction:)\n'
+        today = date.today()
+        released_sets = []        
+        legal_sets = [] 
+
+        # Extract only released sets
+        released_sets = []
+            for set in sets_and_bans['sets']:
+                enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
+                if enter_date < today:
+                    released_sets.append(set)
+
+        # Remove sets that have rotated out
+        for set in released_sets:
+            if set['exitDate']['exact'] is not None:
+                exit_date = datetime.strptime(set['exitDate']['exact'], rfc3339).date()
+                if exit_date >= today:
+                    legal_sets.append(set)
+            else:
+                legal_sets.append(set)
+
+        # Assemble list of legal sets
+        txt += f'Standard legal sets ({today}):'
+        for set in legal_sets:
+            txt += f'\n • {set["name"]}'
+
+        # Assemble list of banned cards
         banned_cards = [card['cardName'] for card in sets_and_bans['bans']]
         if banned_cards:
-            txt += '\nCards banned in Standard ({}):'.format(len(banned_cards))
+            txt += f'\n\nCards banned in Standard ({len(banned_cards)}):'
             for card in banned_cards:
-                txt += '\n•{}'.format(card)
+                txt += f'\n • {card}'
+
         return txt
 
 
