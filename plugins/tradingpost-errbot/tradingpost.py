@@ -180,6 +180,28 @@ class Tradingpost(BotPlugin):
             for card in banned_cards:
                 txt += f'\n • {card}'
 
+        # Add information about rotating sets and entering sets if requested
+        if "future" in args:
+            txt += "\n\nUpcoming sets:"
+            upcoming_sets = []
+            for set in sets_and_bans['sets']:
+                enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
+                if enter_date >= today:
+                    upcoming_sets.append((set['name'], (enter_date - today).days))
+                for name, days in sorted(upcoming_sets, key=lambda e: e[1]):
+                    txt += f"\n • {name} (Releases in {days} days)"
+
+            rotating_sets = []
+            for set in legal_sets:
+                if set["exitDate"]["exact"] is not None:
+                    exit_date = datetime.strptime(set['exitDate']['exact'], rfc3339).date()
+                    days = (exit_date - today).days
+                    rotating_sets.append([set['name'], days])
+            if rotating_sets:
+                txt += f"\n\nSets rotating out:"
+                for name, days in rotating_sets:
+                    txt += f"\n • {name} (Legal for another {days} days)"
+
         return txt
 
 
