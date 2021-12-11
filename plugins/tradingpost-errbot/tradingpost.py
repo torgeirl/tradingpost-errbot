@@ -175,7 +175,8 @@ class Tradingpost(BotPlugin):
             txt += f'\n • {set["name"]}'
 
         # Assemble list of banned cards
-        banned_cards = [card['cardName'] for card in sets_and_bans['bans']]
+        banned_cards = [card['cardName'] for card in sets_and_bans['bans']
+                if card['setCode'] in [set['code'] for set in legal_sets]]
         if banned_cards:
             txt += f'\n\nCards banned in Standard ({len(banned_cards)}):'
             for card in banned_cards:
