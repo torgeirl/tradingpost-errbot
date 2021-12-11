@@ -155,7 +155,8 @@ class Tradingpost(BotPlugin):
 
         # Extract only released sets
         for set in sets_and_bans['sets']:
-            enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
+            if set['enterDate']['exact']:
+                enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
             if enter_date < today:
                 released_sets.append(set)
 
