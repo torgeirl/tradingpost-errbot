@@ -155,7 +155,7 @@ class Tradingpost(BotPlugin):
 
         # Extract only released sets
         for set in sets_and_bans['sets']:
-            if set['enterDate']['exact']:
+            if set['enterDate']['exact'] is not None:
                 enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
             if enter_date < today:
                 released_sets.append(set)
@@ -183,26 +183,32 @@ class Tradingpost(BotPlugin):
                 txt += f'\n • {card}'
 
         # Add information about rotating sets and entering sets if requested
-        if "future" in args:
-            txt += "\n\nUpcoming sets:"
+        if 'future' in args:
+            txt += '\n\nUpcoming sets:'
             upcoming_sets = []
+            tbd_sets = []
             for set in sets_and_bans['sets']:
-                enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
-                if enter_date >= today:
-                    upcoming_sets.append((set['name'], (enter_date - today).days))
+                if set['enterDate']['exact'] is not None:
+                    enter_date = datetime.strptime(set['enterDate']['exact'], rfc3339).date()
+                    if enter_date >= today:
+                        upcoming_sets.append((set['name'], (enter_date - today).days))
+                else:
+                    tbd_sets.append(set['name'])
             for name, days in sorted(upcoming_sets, key=lambda e: e[1]):
-                txt += f"\n • {name} (Releases in {days} days)"
+                txt += f'\n • {name} (Releases in {days} days)'
+            for name in tbd_sets:
+                txt += f'\n • {name} (Release date T.B.D.)'
 
             rotating_sets = []
             for set in legal_sets:
-                if set["exitDate"]["exact"] is not None:
+                if set['exitDate']['exact'] is not None:
                     exit_date = datetime.strptime(set['exitDate']['exact'], rfc3339).date()
                     days = (exit_date - today).days
                     rotating_sets.append([set['name'], days])
             if rotating_sets:
-                txt += f"\n\nSets rotating out:"
+                txt += f'\n\nSets rotating out:'
                 for name, days in rotating_sets:
-                    txt += f"\n • {name} (Legal for another {days} days)"
+                    txt += f'\n • {name} (Legal for another {days} days)'
 
         return txt
 
@@ -294,9 +300,9 @@ def get_card(args, listing=False):
             return response.json()
         except ValueError:
             logger.error(u'No JSON object could be decoded from API response: {}'.format(response))
-            raise CardNotFoundException("Card '{}' not found.".format(name))
+            raise CardNotFoundException('Card \'{}\' not found.'.format(name))
     else:
-        raise CardNotFoundException("Card '{}' not found.".format(name))
+        raise CardNotFoundException('Card \'{}\' not found.'.format(name))
 
 
 def get_card_rulings(scryfall_id):
