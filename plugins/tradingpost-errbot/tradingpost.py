@@ -148,7 +148,6 @@ class Tradingpost(BotPlugin):
         '''Gets the current Standard format from What's in Standard.'''
         sets_and_bans = get_sets_and_bans()
         rfc3339 = '%Y-%m-%dT%H:%M:%S.%f'
-        txt = ''
         today = date.today()
         released_sets = []        
         legal_sets = [] 
@@ -175,7 +174,7 @@ class Tradingpost(BotPlugin):
             txt += f'\n • {set["name"]}'
         yield txt
 
-        # Assemble list of banned cards
+        # Assemble list of banned cards in currently legal sets
         banned_cards = [card['cardName'] for card in sets_and_bans['bans']
                 if card['setCode'] in [set['code'] for set in legal_sets]]
         if banned_cards:
