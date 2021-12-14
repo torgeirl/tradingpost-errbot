@@ -170,21 +170,23 @@ class Tradingpost(BotPlugin):
                 legal_sets.append(set)
 
         # Assemble list of legal sets
-        txt += f'Standard legal sets ({today}):'
+        txt = f'Standard legal sets ({today}):'
         for set in legal_sets:
             txt += f'\n • {set["name"]}'
+        yield txt
 
         # Assemble list of banned cards
         banned_cards = [card['cardName'] for card in sets_and_bans['bans']
                 if card['setCode'] in [set['code'] for set in legal_sets]]
         if banned_cards:
-            txt += f'\n\nCards banned in Standard ({len(banned_cards)}):'
+            txt = f'\n\nCards banned in Standard ({len(banned_cards)}):'
             for card in banned_cards:
                 txt += f'\n • {card}'
+            yield txt
 
         # Add information about rotating sets and entering sets if requested
         if 'future' in args:
-            txt += '\n\nUpcoming sets:'
+            txt = '\n\nUpcoming sets:'
             upcoming_sets = []
             tbd_sets = []
             for set in sets_and_bans['sets']:
@@ -209,8 +211,7 @@ class Tradingpost(BotPlugin):
                 txt += f'\n\nSets rotating out:'
                 for name, days in rotating_sets:
                     txt += f'\n • {name} (Legal for another {days} days)'
-
-        return txt
+            yield txt
 
 
     @botcmd
