@@ -20,7 +20,7 @@ FROM base
 
 COPY --from=builder /install /usr/local
 COPY errbot-config.py /app/errbot-config.py
-COPY backends /app/backends
+COPY backends/err-backend-slackv3 /app/backends/err-backend-slackv3
 COPY plugins/tradingpost-errbot /app/plugins/tradingpost-errbot
 COPY plugins/random-errbot /app/plugins/random-errbot
 
