@@ -8,7 +8,7 @@ def map_path(target_name):
     '''Enables path names to be dynamically ascertained at runtime.'''
     return join(dirname(__file__), target_name).replace('\\', '/')
 
-BACKEND = 'Slack'
+BACKEND = 'SlackV3'
 
 BOT_IDENTITY = {
     'token': getenv('ERRBOT-TOKEN'),
@@ -20,6 +20,7 @@ CHATROOM_PRESENCE = () # this should be empty
 SUPPRESS_CMD_NOT_FOUND = True
 
 BOT_DATA_DIR = map_path('data')
+BOT_EXTRA_BACKEND_DIR map_path('backends')
 BOT_EXTRA_PLUGIN_DIR = map_path('plugins')
 CORE_PLUGINS = ('ACLs', 'CommandNotFoundFilter', 'Health', 'Help', 'Plugins', 'Utils')
 
