@@ -14,7 +14,7 @@ BOT_IDENTITY = {
     'token': getenv('ERRBOT-TOKEN'),
 }
 
-BOT_ADMINS = (getenv('ERRBOT-ADMINS'))
+BOT_ADMINS = getenv('ERRBOT-ADMINS')
 BOT_ALT_PREFIXES = ('@tradingpost',)
 CHATROOM_PRESENCE = () # this should be empty
 SUPPRESS_CMD_NOT_FOUND = True
