@@ -14,7 +14,6 @@ RUN pip install --prefix=/install --no-warn-script-location -r /requirements.txt
 RUN mkdir /backends
 WORKDIR /backends
 RUN git clone https://github.com/errbotio/err-backend-slackv3 --branch v0.1.1
-RUN git clone --depth 1 https://github.com/errbotio/err-backend-slackv3
 RUN pip install --prefix=/install --no-warn-script-location -r err-backend-slackv3/requirements.txt
 
 FROM base
