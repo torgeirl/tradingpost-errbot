@@ -24,6 +24,9 @@ Recreate the deployment to update the bot to the latest version:
   - `$ kubectl delete -f deploy/tradingpost-errbot.yaml`
   - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
 
+## Emojis ##
+Add [Scryfall's Manamoji emojis](https://github.com/scryfall/manamoji-slack/) as custom emojis in your Slack workspace for the MtG symbols to render correctly.
+
 ## History and credits
   - Tradingpost was first created in 2016 as [tradingpost-beepboop](https://github.com/torgeirl/tradingpost-beepboop), a [Beep Boop](https://github.com/BeepBoopHQ/starter-python-bot)-hostable Slack bot. The inspiration to make it came from seeing Filip Söderholm's [cardfetcher bot](https://github.com/fiso/cardfetcher) in action, and part of his code was re-used while making Tradingpost.
 

@@ -262,12 +262,12 @@ def card_text(card):
 
 
 def emoji_filter(input):
-    ret = input.replace('{', ':_')
-    ret = ret.replace('}', '_:')
+    ret = input.replace('{', ':mana-')
+    ret = ret.replace('}', ':')
     lastpos = None
-    while ret.rfind('_:', 0, lastpos) != -1:
-        end = ret.rfind('_:', 0, lastpos)
-        lastpos = ret.rfind(':_', 0, lastpos)
+    while ret.rfind(':', 0, lastpos) != -1:
+        end = ret.rfind(':', 0, lastpos)
+        lastpos = ret.rfind(':mana-', 0, lastpos)
         start = lastpos + 2
         content = ret[start:end]
         content = content.lower()
