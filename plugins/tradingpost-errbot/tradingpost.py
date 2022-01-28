@@ -276,15 +276,6 @@ def emoji_filter(input):
     return ret
 
 
-def find_index_of_sequence(data, sequence, start_index=0):
-    index = start_index
-    for token in sequence:
-        index = data.find(token, index)
-        if index == -1:
-            return -1
-    return index + len(sequence[-1])
-
-
 def get_card(args, listing=False):
     match = re_search(r'\((.+)\)', args)
     name = args.split('(')[0] if match else args
