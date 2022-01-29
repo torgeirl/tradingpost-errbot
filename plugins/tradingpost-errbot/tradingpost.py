@@ -5,7 +5,7 @@ import logging
 from os import getcwd
 from os.path import dirname, join, realpath
 from random import choice as random_choice
-from re import search as re_search
+from re import search as re_search, sub as re_sub, DOTALL as re_dotall
 from time import sleep
 
 from errbot import BotPlugin, botcmd
@@ -253,27 +253,14 @@ class UnexpectedStatusCode(Exception):
 
 
 def card_text(card):
-    txt = u'{} {}\n{}\n{}'.format(card['name'], card['mana_cost'], card['type_line'], card['oracle_text'])
+    text = u'{} {}\n{}\n{}'.format(card['name'], card['mana_cost'], card['type_line'], card['oracle_text'])
     if 'power' in card and 'toughness' in card:
-        txt += u'\n`{}/{}`'.format(card['power'], card['toughness'])
+        text += u'\n`{}/{}`'.format(card['power'], card['toughness'])
     if 'loyalty' in card:
-        txt += u'\n`{}`'.format(card['loyalty'])
-    return emoji_filter(txt)
-
-
-def emoji_filter(input):
-    ret = input.replace('{', ':mana-')
-    ret = ret.replace('}', ':')
-    lastpos = None
-    while ret.rfind(':', 0, lastpos) != -1:
-        end = ret.rfind(':', 0, lastpos)
-        lastpos = ret.rfind(':mana-', 0, lastpos)
-        start = lastpos + 2
-        content = ret[start:end]
-        content = content.lower()
-        content = content.replace('/', '')
-        ret = ret[:start] + content + ret[end:]
-    return ret
+        text += u'\n`{}`'.format(card['loyalty'])
+    return re_sub('{([a-zA-Z\d\/]+)}',
+                  lambda match: ':mana-{}:'.format(match.group(1).replace('/', '').lower()),
+                  text, flags=re_dotall)
 
 
 def get_card(args, listing=False):
