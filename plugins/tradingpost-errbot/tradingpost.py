@@ -10,7 +10,7 @@ from time import sleep
 
 from errbot import BotPlugin, botcmd
 from PIL import Image
-from requests import get as requests_get, post as requests_post
+from requests import get as requests_get
 
 __location__ = realpath(join(getcwd(), dirname(__file__)))
 logger = logging.getLogger(__name__)
