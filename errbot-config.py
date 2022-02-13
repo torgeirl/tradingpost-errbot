@@ -1,6 +1,7 @@
 # http://errbot.io/en/latest/user_guide/configuration/slack.html
 
 import logging
+from json import loads as json_loads
 from os import getenv
 from os.path import dirname, join
 
@@ -14,7 +15,7 @@ BOT_IDENTITY = {
     'token': getenv('ERRBOT-TOKEN'),
 }
 
-BOT_ADMINS = getenv('ERRBOT-ADMINS')
+BOT_ADMINS = json_loads(getenv('ERRBOT-ADMINS'))
 BOT_ALT_PREFIXES = ('@tradingpost',)
 CHATROOM_PRESENCE = () # this should be empty
 SUPPRESS_CMD_NOT_FOUND = True
