@@ -19,7 +19,7 @@ RUN pip install --prefix=/install --no-warn-script-location -r err-backend-slack
 FROM base
 
 COPY --from=builder /install /usr/local
-COPY errbot-config.py /app/errbot-config.py
+COPY errbot-config.py /app/config.py
 COPY --from=builder /backends/err-backend-slackv3 /app/backends/err-backend-slackv3
 COPY plugins/tradingpost-errbot /app/plugins/tradingpost-errbot
 COPY plugins/random-errbot /app/plugins/random-errbot
@@ -28,4 +28,4 @@ WORKDIR /app
 
 RUN ["errbot", "--init"]
 RUN rm -rf plugins/err-example
-CMD ["errbot", "--config", "errbot-config.py"]
+CMD ["errbot", "--config", "config.py"]
