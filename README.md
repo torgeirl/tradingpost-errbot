@@ -8,13 +8,13 @@ tradingpost-errbot
 A simple Magic: the Gathering bot for Slack, implemented as an Errbot plugin and deployed with Kubernetes.
 
 ## Deployment (kubectl)
-[Edit an existing or create a new Slack app](http://api.slack.com/apps), and make the following adjustment to enable the app to run Trading Post:
+[Edit an existing or create a new Slack app](http://api.slack.com/apps), and make the following adjustments to enable the app to run Trading Post's bot commands:
   - create a new App-Level Token with the `connections:write` scope
   - set the app name to `tradingpost`
   - enable Socket Mode
   - allow users to send Slash commands and messages from the messages tab
   - subscribe to the following bot events: `file_create`, `file_public`, `message.channels`, `message.groups` and `message.im`
-  - add the follwing OAuth scopes: `channels:history`, `channels:read`, `chat:write`, 'files:read`, `files:write`, `groups:history`, `groups:read`, `im:history`, `im:read`, `mpim:read`, `team:read`, and `users:read` 
+  - add the follwing OAuth scopes: `channels:history`, `channels:read`, `chat:write`, `files:read`, `files:write`, `groups:history`, `groups:read`, `im:history`, `im:read`, `mpim:read`, `team:read`, and `users:read`
 
 Save your bot's Slack token, signing secret, app token and the username(s) of the bot's admin(s) as secrets:
   - `$ kubectl create secret generic tradingpost-configi --from-literal='errbot-token=xoxb-4426949411-aEM7...' --from-literal='errbot-signing-secret="<hexadecimal value>" --from-literal='errbot-app-token=xapp-A111-222-xyz...' --from-literal='errbot-admins=["Uxxxxxxxx", "Uxxxxxxxx"]'`
