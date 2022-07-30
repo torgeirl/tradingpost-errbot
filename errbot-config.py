@@ -12,7 +12,7 @@ def map_path(target_name):
 BACKEND = 'SlackV3'
 
 BOT_IDENTITY = {
-    'token': getenv('ERRBOT-TOKEN'),
+    'app_token': getenv('ERRBOT-TOKEN'),
 }
 
 BOT_ADMINS = json_loads(getenv('ERRBOT-ADMINS'))
