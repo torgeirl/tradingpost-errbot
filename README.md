@@ -9,7 +9,7 @@ A simple Magic: the Gathering bot for Slack, implemented as an Errbot plugin and
 
 ## Deployment (kubectl)
 Save your bot's Slack token and the username(s) of the bot's admin(s) as secrets:
-  - `$ kubectl create secret generic tradingpost-config --from-literal='errbot-token=xapp-A111-222-xyz...' --from-literal='errbot-admins=["Uxxxxxxxx", "Uxxxxxxxx"]'`
+  - `$ kubectl create secret generic tradingpost-config --from-literal='errbot-app-token=xapp-A111-222-xyz...' --from-literal='errbot-signing-secret="<hexadecimal value>" --from-literal='errbot-admins=["Uxxxxxxxx", "Uxxxxxxxx"]'`
 
 Deploy the bot:
   - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
