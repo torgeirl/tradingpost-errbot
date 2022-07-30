@@ -20,8 +20,18 @@ spec:
           - name: ERRBOT-TOKEN
             valueFrom:
               secretKeyRef:
-                name: tradingpost-config 
+                name: tradingpost-config
                 key: errbot-token
+          - name: ERRBOT-SIGNING-SECRET
+            valueFrom:
+              secretKeyRef:
+                name: tradingpost-config
+                key: errbot-signing-secret
+          - name: ERRBOT-APP-TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: tradingpost-config
+                key: errbot-app-token
           - name: ERRBOT-ADMINS
             valueFrom:
               secretKeyRef:
