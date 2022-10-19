@@ -16,6 +16,7 @@ spec:
       containers:
       - name: tradingpost-errbot
         image: ghcr.io/torgeirl/tradingpost-errbot:latest
+        imagePullPolicy: Always
         env:
           - name: ERRBOT-TOKEN
             valueFrom:
@@ -37,3 +38,10 @@ spec:
               secretKeyRef:
                 name: tradingpost-config
                 key: errbot-admins
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi

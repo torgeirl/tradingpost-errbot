@@ -28,9 +28,8 @@ You can see the bot's pod by listing pods:
 The Errbot logs are available from Kubernetes:
   - `$ kubectl logs tradingpost-deployment-<pod-identifier>`
 
-Recreate the deployment to update the bot to the latest version:
-  - `$ kubectl delete -f deploy/tradingpost-errbot.yaml`
-  - `$ kubectl create -f deploy/tradingpost-errbot.yaml`
+Run `rollout` on the deployment to update the bot to the latest version:
+  - `$ kubectl rollout restart deploy tradingpost-deployment`
 
 ## Emojis ##
 Add [Scryfall's Manamoji emojis](https://github.com/scryfall/manamoji-slack/) as custom emojis in your Slack workspace for the MtG symbols to render correctly.
