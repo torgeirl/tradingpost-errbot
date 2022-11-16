@@ -236,10 +236,11 @@ class Tradingpost(BotPlugin):
 
         sutcliffe_bytes = BytesIO()
         sutcliffe_template.save(sutcliffe_bytes, format='PNG')
+        size = sutcliffe_bytes.getbuffer().nbytes
         sutcliffe_bytes.seek(0)
 
         name = 'sutcliffe-{}.png'.format(datetime.now().strftime('%Y%m%d-%H%M'))
-        self.send_stream_request(msg.frm, sutcliffe_bytes, name=name)
+        self.send_stream_request(msg.frm, sutcliffe_bytes, name=name, size=size, stream_type='image/png')
 
 
 class CardNotFoundException(Exception):
