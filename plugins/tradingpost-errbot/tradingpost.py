@@ -31,12 +31,16 @@ class Tradingpost(BotPlugin):
             for face in card['card_faces']:
                 self.send_card(title=face['name'],
                                body=body,
-                               image=face['image_uris']['normal'],
+                               link=face['scryfall_uri'],
+                               image=face['image_uris']['png'],
+                               thumbnail=face['image_uris']['small'],
                                in_reply_to=msg)
         else:
             self.send_card(title=card['name'],
                            body=body,
-                           image=card['image_uris']['normal'],
+                           link=card['scryfall_uri'],
+                           image=card['image_uris']['png'],
+                           thumbnail=card['image_uris']['small'],
                            in_reply_to=msg)
 
     @botcmd
@@ -318,7 +322,7 @@ def get_sets_and_bans():
 
 def download_card_image(cardname):
     card = get_card(cardname)
-    image_url = card['image_uris']['normal'] # 488*680 (w*h)
+    image_url = card['image_uris']['normal'] # 488*680 (w*h) #TODO: switch to ['png']?
     image = Image.open(BytesIO(requests_get(image_url).content))
     resize_ratio = min((0.5 * 488) / image.width, (0.5 * 680) / image.height)
     return image.resize((int(image.width*resize_ratio), int(image.height*resize_ratio)), Image.ANTIALIAS)
