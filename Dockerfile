@@ -7,9 +7,10 @@ WORKDIR /install
 
 COPY requirements.txt /requirements.txt
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends libjpeg62-turbo-dev zlib1g-dev git
-RUN pip install --prefix=/install --no-warn-script-location -r /requirements.txt
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y --no-install-recommends libjpeg62-turbo-dev zlib1g-dev git && \
+    pip install --prefix=/install --no-warn-script-location -r /requirements.txt
 
 RUN mkdir /backends
 WORKDIR /backends
@@ -18,6 +19,10 @@ WORKDIR /backends/err-backend-slackv3
 RUN pip install --prefix=/install --no-warn-script-location .
 
 FROM base
+
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
 COPY errbot-config.py /app/errbot-config.py
