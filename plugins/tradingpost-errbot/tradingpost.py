@@ -323,4 +323,4 @@ def download_card_image(cardname):
     image_url = card['image_uris']['normal'] # 488*680 (w*h) #TODO: switch to ['png']?
     image = Image.open(BytesIO(requests_get(image_url).content))
     resize_ratio = min((0.5 * 488) / image.width, (0.5 * 680) / image.height)
-    return image.resize((int(image.width*resize_ratio), int(image.height*resize_ratio)), Image.ANTIALIAS)
+    return image.resize((int(image.width*resize_ratio), int(image.height*resize_ratio)), Image.LANCZOS)
