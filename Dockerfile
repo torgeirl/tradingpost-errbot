@@ -1,4 +1,4 @@
-FROM python:3.10-slim as base
+FROM python:3.11-slim as base
 
 FROM base as builder
 
@@ -22,7 +22,8 @@ FROM base
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --upgrade pip
 
 COPY --from=builder /install /usr/local
 COPY errbot-config.py /app/errbot-config.py
