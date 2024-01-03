@@ -1,4 +1,4 @@
-errbot[slack]==6.1.8
+errbot[slack]==6.2.0
 Pillow
 requests
 slackclient
