@@ -27,22 +27,19 @@ class Tradingpost(BotPlugin):
         except CardNotFoundException as e:
             return e.msg
         body = '{} ({})'.format(card['set_name'], card['set'].upper())
-        parent = msg.parent if msg.parent else None
         if card['layout'] in ('transform', 'modal_dfc'):
             for face in card['card_faces']:
                 self.send_card(title=face['name'],
                                body=body,
                                link=face['scryfall_uri'],
                                image=face['image_uris']['normal'],
-                               to=msg.frm,
-                               parent=parent)
+                               to=msg)
         else:
             self.send_card(title=card['name'],
                            body=body,
                            link=card['scryfall_uri'],
                            image=card['image_uris']['normal'],
-                           to=msg.frm,
-                           parent=parent)
+                           to=msg)
 
     @botcmd
     def flavor(self, msg, args):
