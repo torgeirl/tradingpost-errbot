@@ -33,13 +33,13 @@ class Tradingpost(BotPlugin):
                                body=body,
                                link=face['scryfall_uri'],
                                image=face['image_uris']['normal'],
-                               to=msg)
+                               in_reply_to=msg)
         else:
             self.send_card(title=card['name'],
                            body=body,
                            link=card['scryfall_uri'],
                            image=card['image_uris']['normal'],
-                           to=msg)
+                           in_reply_to=msg)
 
     @botcmd
     def flavor(self, msg, args):
